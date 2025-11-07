@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
@@ -138,41 +138,42 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         </div>
         
         {/* New Layout Overlay */}
-        <div className="absolute inset-0 z-10 flex flex-col justify-center p-8 md:p-12 pointer-events-none bg-gradient-to-b from-black/50 via-transparent to-black/90">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/90 via-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full">
+            
+            <div className='absolute top-[25vh] md:top-[20vh] left-0 pointer-events-auto'>
+              <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+              <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+            </div>
+
             <AnimatePresence mode="wait">
                  <motion.div
                     key={activeFilm.id}
-                    className="w-full max-w-6xl mx-auto pointer-events-auto"
+                    className="w-full pointer-events-auto absolute bottom-0 left-0"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.6 }}
                   >
-                    <div className='absolute top-[-15vh] md:top-[-20vh] left-0'>
-                      <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
-                      <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
-                    </div>
-
-                    <div className="flex flex-col items-start text-left">
+                    <div className="flex flex-col items-start text-left mb-8 md:mb-12">
                         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-headline">{activeFilm.title}</h1>
-                        <div className="flex gap-x-4 md:gap-x-6 mt-4 text-xs md:text-sm text-gray-300 font-mono">
+                        <div className="flex gap-x-4 md:gap-x-6 mt-4 text-xs md:text-sm text-primary font-mono">
                             <span>{activeFilm.genre}</span>
-                            <span>&bull;</span>
                             <span>{activeFilm.duration}</span>
-                            <span>&bull;</span>
                             <span>{activeFilm.language}</span>
                         </div>
-                        <div className="mt-6 flex items-center gap-4">
-                            <button onClick={scrollPrev} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors">
-                                <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
+                        <div className="mt-6 flex items-center gap-2">
+                            <button onClick={scrollPrev} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors border border-primary hover:bg-primary">
+                                <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
                             </button>
-                             <button onClick={scrollNext} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors">
-                                <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
+                             <button onClick={scrollNext} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors border border-primary hover:bg-primary">
+                                <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
                             </button>
                         </div>
                     </div>
                  </motion.div>
             </AnimatePresence>
+            </div>
         </div>
       </div>
 

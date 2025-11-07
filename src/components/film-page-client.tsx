@@ -55,12 +55,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         const video = slide?.querySelector('video');
         if (video) {
             const isSlideActive = index === api.selectedScrollSnap();
-            if (isSlideActive && video.paused) {
-                // We only try to play if the user has interacted or it's not a touch device
+            if (isSlideActive) {
+                // On touch devices, only play after interaction. On desktop, play always.
                 if(hasInteracted || !isTouchDevice.current) {
-                  video.play().catch(err => {
-                    console.log("Autoplay was prevented. Awaiting user interaction.");
-                  });
+                  if (video.paused) {
+                    video.play().catch(err => {
+                      console.log("Autoplay was prevented. Awaiting user interaction.");
+                    });
+                  }
                 }
             } else if (!isSlideActive && !video.paused) {
                 video.pause();
@@ -78,10 +80,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    if (isHovering) return;
-
-    // On mobile, only start autoplay after user has interacted
-    if (isTouchDevice.current && !hasInteracted) return;
+    // Don't start if hovering, or on mobile before interaction
+    if (isHovering || (isTouchDevice.current && !hasInteracted)) return;
 
     setProgress(0);
     const timer = setInterval(() => {
@@ -98,9 +98,13 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
       setHasInteracted(true);
-      // Attempt to play the current video now that we have user interaction
+      // The useEffect listening to hasInteracted will handle the rest
+    }
+  }, [hasInteracted]);
+
+  useEffect(() => {
+    if (hasInteracted) {
       attemptToPlayVideo();
-      // Start autoplay if it wasn't running
       startAutoplay();
     }
   }, [hasInteracted, attemptToPlayVideo, startAutoplay]);
@@ -111,7 +115,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     isTouchDevice.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice.current) {
       setShowSwipeHint(true);
-      const timer = setTimeout(() => setShowSwipeHint(false), 4000); // Show hint for 4 seconds
+      const timer = setTimeout(() => setShowSwipeHint(false), 3000); // Show hint for 3 seconds
       return () => clearTimeout(timer);
     }
   }, []);
@@ -124,15 +128,13 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
-    if (!hasInteracted) {
-      handleUserInteraction();
-    }
+    handleUserInteraction();
     
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
+  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -164,7 +166,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
     
-    // Autoplay logic for desktop
+    // Start autoplay immediately on desktop
     if (!isTouchDevice.current) {
         startAutoplay();
     }
@@ -216,8 +218,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   return (
     <main
       className="bg-background text-foreground"
-      onMouseEnter={() => { if(!isHovering) setIsHovering(true); }}
-      onMouseLeave={() => { if(isHovering) setIsHovering(false); }}
+      onMouseEnter={() => { if(!isTouchDevice.current && !isHovering) setIsHovering(true); }}
+      onMouseLeave={() => { if(!isTouchDevice.current && isHovering) setIsHovering(false); }}
       onClick={handleUserInteraction}
     >
       <Header />
@@ -249,11 +251,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <AnimatePresence>
             {showSwipeHint && (
                 <motion.div
-                    initial={{ opacity: 0 }}
+                    initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: [0, 1, 1, 0] }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 4, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-30 top-24 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
+                    transition={{ duration: 3, times: [0, 0.1, 0.9, 1] }}
+                    className="absolute z-30 top-20 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
                 >
                     <div className="flex items-center gap-2 bg-black/50 text-white p-3 rounded-lg">
                         <MoveHorizontal className="w-6 h-6"/>
@@ -263,10 +265,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             )}
         </AnimatePresence>
 
-        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/95 via-black/80 to-transparent pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-none">
+            <div className="w-full pointer-events-auto" onClick={(e) => e.stopPropagation()}>
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}

@@ -185,10 +185,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end">
+        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-black/20">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end items-start">
             
-            <div className="pb-[12vh]">
+            <div className="w-full pb-[15vh]">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}

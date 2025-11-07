@@ -22,19 +22,16 @@ const AUTOPLAY_DURATION = 12000; // 12 seconds
 export default function FilmPageClient({ films: unsortedFilms, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
   
-  // 1. Sort films immediately based on slider_position
   const films = useMemo(() => 
     [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position),
     [unsortedFilms]
   );
 
-  // 2. Find the correct initial index from the *sorted* list
   const initialSlideIndex = useMemo(() => 
-    films.findIndex((f) => f.slug === initialSlug), 
+    films.findIndex((f) => f.slug === initialSlug),
     [films, initialSlug]
   );
   
-  // 3. Initialize Embla with the correct starting index
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
     startIndex: initialSlideIndex >= 0 ? initialSlideIndex : 0,
@@ -46,7 +43,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
 
-  // This will now correctly reference the film from the sorted array
   const activeFilm = films[activeIndex];
 
   const clearAutoplayTimer = useCallback(() => {
@@ -62,7 +58,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     const timer = setInterval(() => {
         setProgress(prev => {
             if (prev >= 100) {
-                // Let the 'select' event handle the logic
                 return 100;
             }
             return prev + (100 / (AUTOPLAY_DURATION / 100));
@@ -71,7 +66,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     autoplayTimer.current = timer;
   }, [clearAutoplayTimer]);
 
-  // Effect to advance slide when progress reaches 100
   useEffect(() => {
       if (progress >= 100) {
           emblaApi?.scrollNext();
@@ -81,7 +75,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
     clearAutoplayTimer();
-    setProgress(0); // Reset progress on user interaction
+    setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
   }, [emblaApi, clearAutoplayTimer, startAutoplay]);
@@ -101,9 +95,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
     const onSelect = () => {
       setActiveIndex(emblaApi.selectedScrollSnap());
-      setProgress(0); // Reset progress on any slide change
+      setProgress(0);
       if (!isHovering) {
-        startAutoplay(); // Restart autoplay timer
+        startAutoplay();
       }
     };
     
@@ -114,7 +108,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
 
-    // Initial start
     if (!isHovering) {
         startAutoplay();
     }
@@ -126,7 +119,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     };
   }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
 
-  // Handle hover state
   useEffect(() => {
     if (isHovering) {
         clearAutoplayTimer();
@@ -159,7 +151,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   }, [scrollNext, scrollPrev]);
 
   if (!activeFilm) {
-    // Render a loading state or null if films are not yet available.
     return null;
   }
 
@@ -194,61 +185,65 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[20vh] md:pb-[15vh]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end">
             
-            <AnimatePresence>
-              <motion.div
-                key={`counter-${activeFilm.id}`}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
-                exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-4'>
-                <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
-                <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
-              </motion.div>
-            </AnimatePresence>
+            <div className="pb-[15vh]">
+                <AnimatePresence>
+                  <motion.div
+                    key={`counter-${activeFilm.id}`}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
+                    exit={{ opacity: 0 }}
+                    className='pointer-events-auto self-start mb-4'>
+                    <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
+                    <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+                  </motion.div>
+                </AnimatePresence>
 
-            <AnimatePresence mode="wait">
-                 <motion.div
-                    key={activeFilm.id}
-                    className="w-full pointer-events-auto"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -30 }}
-                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
-                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                           <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
-                           <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
-                           <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
+                <AnimatePresence mode="wait">
+                     <motion.div
+                        key={activeFilm.id}
+                        className="w-full pointer-events-auto"
+                        initial={{ opacity: 0, y: 30 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -30 }}
+                        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                      >
+                        <div className="flex flex-col items-start text-left max-w-none">
+                            <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                            <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                               <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
+                               <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
+                               <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
+                            </div>
                         </div>
-                    </div>
-                 </motion.div>
-            </AnimatePresence>
-             <div className="absolute -bottom-8 left-0 flex items-center gap-4 mt-8">
-                <motion.button 
-                    onClick={scrollPrev} 
-                    className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
-                    whileHover="hover"
-                >
-                    <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                        <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
-                    </motion.div>
-                </motion.button>
-                 <motion.button 
-                    onClick={scrollNext} 
-                    className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
-                    whileHover="hover"
-                >
-                    <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                        <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
-                    </motion.div>
-                </motion.button>
+                     </motion.div>
+                </AnimatePresence>
+
+                 <div className="flex items-center gap-4 mt-8">
+                    <motion.button 
+                        onClick={scrollPrev} 
+                        className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                        whileHover="hover"
+                    >
+                        <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                            <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
+                        </motion.div>
+                    </motion.button>
+                     <motion.button 
+                        onClick={scrollNext} 
+                        className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                        whileHover="hover"
+                    >
+                        <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                            <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
+                        </motion.div>
+                    </motion.button>
+                </div>
             </div>
-            </div>
+            
+          </div>
         </div>
       </div>
 

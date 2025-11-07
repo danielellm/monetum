@@ -257,15 +257,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <AnimatePresence>
             {showSwipeHint && (
                 <motion.div
-                    initial={{ opacity: 0, y: -20 }}
+                    initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: [0, 1, 1, 0] }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 3, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-30 top-20 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
+                    transition={{ duration: 2, times: [0, 0.1, 0.9, 1] }}
+                    className="absolute z-30 top-24 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
                 >
-                    <div className="flex items-center gap-2 bg-black/50 text-white p-3 rounded-lg">
-                        <MoveHorizontal className="w-6 h-6"/>
-                        <span>Swipe to navigate</span>
+                    <div className="flex items-center gap-2 bg-black/30 text-white p-2 px-4 rounded-lg">
+                        <MoveHorizontal className="w-5 h-5"/>
+                        <span className="text-sm">Swipe to navigate</span>
                     </div>
                 </motion.div>
             )}

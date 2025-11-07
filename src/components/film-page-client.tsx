@@ -158,8 +158,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-end pb-[20vh] md:pb-[25vh]">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[5vh]">
             
             <AnimatePresence>
               <motion.div
@@ -183,7 +183,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <h1 className="text-7xl md:text-[140px] lg:text-[160px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                         <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
@@ -192,8 +192,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     </div>
                  </motion.div>
             </AnimatePresence>
-            </div>
-             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 w-full max-w-6xl mx-auto px-8 md:px-12">
+             <div className="flex items-center gap-4 mt-8">
                 <motion.button 
                     onClick={scrollPrev} 
                     className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
@@ -212,6 +211,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                         <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
                     </motion.div>
                 </motion.button>
+            </div>
             </div>
         </div>
       </div>

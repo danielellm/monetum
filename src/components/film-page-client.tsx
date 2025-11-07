@@ -32,6 +32,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
+  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
 
   const activeFilm = films[activeIndex];
 
@@ -54,18 +55,37 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     setProgress(0); // Reset progress on interaction
   }, [emblaApi]);
 
+   const startAutoplay = useCallback(() => {
+    if (timer) clearInterval(timer);
+    const newTimer = setInterval(() => {
+      setProgress(p => {
+        if (p >= 100) {
+          emblaApi?.scrollNext();
+          return 0;
+        }
+        return p + (100 / (AUTOPLAY_DURATION / 100));
+      });
+    }, 100);
+    setTimer(newTimer);
+  }, [emblaApi, timer]);
+
+
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', () => {
         setIsInteracting(true);
         setProgress(0);
+        if (timer) clearInterval(timer);
+    });
+     emblaApi.on('settle', () => {
+      setIsInteracting(false);
     });
     // Clean up listeners
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, onSelect]);
+  }, [emblaApi, onSelect, timer]);
 
   useEffect(() => {
     if (initialSlideIndex !== -1 && emblaApi) {
@@ -87,18 +107,15 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   }, [activeIndex, films, router, emblaApi]);
 
   useEffect(() => {
-    if (isHovering || isInteracting) return;
-    const interval = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) {
-          emblaApi?.scrollNext();
-          return 0;
-        }
-        return p + (100 / (AUTOPLAY_DURATION / 100));
-      });
-    }, 100);
-    return () => clearInterval(interval);
-  }, [emblaApi, isHovering, isInteracting]);
+    if (isHovering || isInteracting) {
+      if (timer) clearInterval(timer);
+      return;
+    }
+    startAutoplay();
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [emblaApi, isHovering, isInteracting, startAutoplay]);
   
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -144,8 +161,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/70 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-20">
             
             <AnimatePresence>
               <motion.div
@@ -153,7 +170,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-8'>
+                className='pointer-events-auto self-start mb-12'>
                 <span className="text-2xl md:text-3xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
                 <span className="text-base md:text-lg text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
@@ -169,11 +186,11 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-headline leading-none">{activeFilm.title}</h1>
-                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
-                            <span>{activeFilm.genre}</span>
-                            <span>{activeFilm.duration}</span>
-                            <span>{activeFilm.language}</span>
+                        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <div className="flex flex-wrap gap-x-6 md:gap-x-8 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
+                            <p><span className="text-muted-foreground">Genre: </span><span className="text-foreground">{activeFilm.genre}</span></p>
+                            <p><span className="text-muted-foreground">Dauer: </span><span className="text-foreground">{activeFilm.duration}</span></p>
+                            <p><span className="text-muted-foreground">Sprache: </span><span className="text-foreground">{activeFilm.language}</span></p>
                         </div>
                         <div className="mt-8 flex items-center gap-4">
                             <motion.button 

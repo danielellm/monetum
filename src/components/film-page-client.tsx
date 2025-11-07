@@ -59,7 +59,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
 
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
-    if (newSlug && newSlug !== initialSlug) {
+    if (newSlug && window.location.pathname !== `/filme/${newSlug}`) {
       window.history.pushState({}, '', `/filme/${newSlug}`);
     }
     if (emblaApi) {
@@ -68,7 +68,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         router.prefetch(`/filme/${films[nextIndex].slug}`);
         router.prefetch(`/filme/${films[prevIndex].slug}`);
     }
-  }, [activeIndex, films, router, initialSlug, emblaApi]);
+  }, [activeIndex, films, router, emblaApi]);
 
   useEffect(() => {
     if (isHovering || isInteracting) return;
@@ -137,9 +137,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        {/* New Layout Overlay */}
         <div className="absolute inset-0 z-10 flex flex-col justify-center items-start p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/90 via-black/30 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex items-center">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center">
             
             <AnimatePresence>
               <motion.div
@@ -147,9 +146,9 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='absolute top-[20vh] md:top-[15vh] left-0 pointer-events-auto'>
-                <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
-                <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+                className='pointer-events-auto self-start mb-4'>
+                <span className="text-4xl md:text-6xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                <span className="text-lg md:text-2xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
             </AnimatePresence>
 
@@ -162,7 +161,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     exit={{ opacity: 0, y: -30 }}
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <div className="flex flex-col items-start text-left max-w-4xl">
+                    <div className="flex flex-col items-start text-left max-w-none">
                         <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-headline leading-none">{activeFilm.title}</h1>
                         <div className="flex gap-x-4 md:gap-x-6 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
                             <span>{activeFilm.genre}</span>

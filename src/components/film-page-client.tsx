@@ -1,7 +1,7 @@
 'use client';
 
 import type { Film } from '@/lib/types';
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -31,77 +31,76 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   const [activeIndex, setActiveIndex] = useState(initialSlideIndex);
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
-  const [isInteracting, setIsInteracting] = useState(false);
   
+  const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
+
   const activeFilm = films[activeIndex];
 
-  const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev();
-  }, [emblaApi]);
-  
-  const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext();
-  }, [emblaApi]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setActiveIndex(emblaApi.selectedScrollSnap());
-  }, [emblaApi]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    const onPointerDown = () => {
-        setIsInteracting(true);
-    };
-
-    const onSettle = () => {
-        setIsInteracting(false);
-    };
-
-    emblaApi.on('select', onSelect);
-    emblaApi.on('pointerDown', onPointerDown);
-    emblaApi.on('settle', onSettle);
-
-    return () => {
-      emblaApi.off('select', onSelect);
-      emblaApi.off('pointerDown', onPointerDown);
-      emblaApi.off('settle', onSettle);
-    };
-  }, [emblaApi, onSelect]);
-
-  useEffect(() => {
-    if (isHovering || isInteracting) {
-        setProgress(0);
-        return;
+  const clearAutoplayTimer = useCallback(() => {
+    if (autoplayTimer.current) {
+      clearInterval(autoplayTimer.current);
+      autoplayTimer.current = null;
     }
+  }, []);
 
-    const interval = setInterval(() => {
+  const startAutoplay = useCallback(() => {
+    clearAutoplayTimer();
+    const newTimer = setInterval(() => {
       setProgress(p => {
         if (p >= 100) {
-          scrollNext();
+          emblaApi?.scrollNext();
           return 0;
         }
         return p + (100 / (AUTOPLAY_DURATION / 100));
       });
     }, 100);
+    autoplayTimer.current = newTimer;
+  }, [clearAutoplayTimer, emblaApi]);
 
-    return () => clearInterval(interval);
+  const onInteraction = useCallback(() => {
+    clearAutoplayTimer();
+    setProgress(0);
+    // Restart autoplay after a delay
+    setTimeout(startAutoplay, 5000); 
+  }, [clearAutoplayTimer, startAutoplay]);
 
-  }, [isHovering, isInteracting, scrollNext]);
+  const scrollPrev = useCallback(() => {
+    emblaApi?.scrollPrev();
+    onInteraction();
+  }, [emblaApi, onInteraction]);
+  
+  const scrollNext = useCallback(() => {
+    emblaApi?.scrollNext();
+    onInteraction();
+  }, [emblaApi, onInteraction]);
+
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIndex(emblaApi.selectedScrollSnap());
+    setProgress(0); // Reset progress on manual slide change
+  }, [emblaApi]);
 
   useEffect(() => {
-    if (initialSlideIndex !== -1 && emblaApi) {
-      emblaApi.scrollTo(initialSlideIndex, true);
-    }
-  }, [initialSlideIndex, emblaApi]);
+    if (!emblaApi) return;
 
-  useEffect(() => {
-    if (isInteracting) {
+    emblaApi.on('select', onSelect);
+    emblaApi.on('pointerDown', onInteraction);
+    
+    // Autoplay logic
+    if (isHovering) {
+        clearAutoplayTimer();
         setProgress(0);
+    } else {
+        startAutoplay();
     }
-  }, [isInteracting]);
 
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('pointerDown', onInteraction);
+      clearAutoplayTimer();
+    };
+  }, [emblaApi, onSelect, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
+  
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
     if (newSlug && window.location.pathname !== `/filme/${newSlug}`) {
@@ -113,7 +112,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         router.prefetch(`/filme/${films[nextIndex].slug}`);
         router.prefetch(`/filme/${films[prevIndex].slug}`);
     }
-  }, [activeIndex, films, router, emblaApi, isInteracting]);
+  }, [activeIndex, films, router, emblaApi]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -136,8 +135,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-800 z-20">
-            {(progress > 0) && <motion.div
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-800/50 z-20">
+            {!isHovering && progress > 0 && <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
@@ -152,7 +151,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 <HeroSlide
                   film={film}
                   isActive={index === activeIndex}
-                  isMuted={isHovering || isInteracting}
+                  isMuted={isHovering}
                 />
               </div>
             ))}
@@ -160,7 +159,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         </div>
         
         <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-end pb-[20vh] md:pb-[25vh]">
             
             <AnimatePresence>
               <motion.div
@@ -190,29 +189,29 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
                            <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
                         </div>
-                        <div className="mt-8 flex items-center gap-4">
-                            <motion.button 
-                                onClick={scrollPrev} 
-                                className="pointer-events-auto p-2 text-primary hover:text-white transition-colors group"
-                                whileHover="hover"
-                            >
-                                <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                                    <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
-                                </motion.div>
-                            </motion.button>
-                             <motion.button 
-                                onClick={scrollNext} 
-                                className="pointer-events-auto p-2 text-primary hover:text-white transition-colors group"
-                                whileHover="hover"
-                            >
-                                <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                                    <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
-                                </motion.div>
-                            </motion.button>
-                        </div>
                     </div>
                  </motion.div>
             </AnimatePresence>
+            </div>
+             <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 w-full max-w-6xl mx-auto px-8 md:px-12">
+                <motion.button 
+                    onClick={scrollPrev} 
+                    className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                    whileHover="hover"
+                >
+                    <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
+                    </motion.div>
+                </motion.button>
+                 <motion.button 
+                    onClick={scrollNext} 
+                    className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                    whileHover="hover"
+                >
+                    <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
+                    </motion.div>
+                </motion.button>
             </div>
         </div>
       </div>

@@ -61,7 +61,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     clearAutoplayTimer();
     setProgress(0);
     // Restart autoplay after a delay
-    setTimeout(startAutoplay, 5000); 
+    const restartTimer = setTimeout(startAutoplay, 5000); 
+    return () => clearTimeout(restartTimer);
   }, [clearAutoplayTimer, startAutoplay]);
 
   const scrollPrev = useCallback(() => {
@@ -158,8 +159,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[5vh]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[10vh]">
             
             <AnimatePresence>
               <motion.div
@@ -168,7 +169,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
                 className='pointer-events-auto self-start mb-6 md:mb-8'>
-                <span className="text-xl md:text-2xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                <span className="text-xl md:text-2xl text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
                 <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
             </AnimatePresence>
@@ -183,7 +184,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-[140px] lg:text-[160px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <h1 className="text-7xl md:text-[140px] lg:text-[180px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                         <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
@@ -192,7 +193,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     </div>
                  </motion.div>
             </AnimatePresence>
-             <div className="flex items-center gap-4 mt-8">
+             <div className="absolute bottom-0 left-0 flex items-center gap-4 mt-8">
                 <motion.button 
                     onClick={scrollPrev} 
                     className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"

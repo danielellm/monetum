@@ -36,27 +36,9 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
 
   const activeFilm = films[activeIndex];
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setActiveIndex(emblaApi.selectedScrollSnap());
-    setProgress(0);
-    setIsInteracting(false); // Reset interaction state on new slide
-  }, [emblaApi]);
-
-  const scrollPrev = useCallback(() => {
-    emblaApi && emblaApi.scrollPrev();
-    setIsInteracting(true);
-    setProgress(0); // Reset progress on interaction
-  }, [emblaApi]);
-  
-  const scrollNext = useCallback(() => {
-    emblaApi && emblaApi.scrollNext();
-    setIsInteracting(true);
-    setProgress(0); // Reset progress on interaction
-  }, [emblaApi]);
-
-   const startAutoplay = useCallback(() => {
+  const startAutoplay = useCallback(() => {
     if (timer) clearInterval(timer);
+    setProgress(0);
     const newTimer = setInterval(() => {
       setProgress(p => {
         if (p >= 100) {
@@ -69,23 +51,50 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     setTimer(newTimer);
   }, [emblaApi, timer]);
 
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIndex(emblaApi.selectedScrollSnap());
+    setIsInteracting(false); // Reset interaction state on new slide
+    if (!isHovering) {
+        startAutoplay();
+    } else {
+        setProgress(0);
+    }
+  }, [emblaApi, isHovering, startAutoplay]);
+
+  const scrollPrev = useCallback(() => {
+    emblaApi && emblaApi.scrollPrev();
+    setIsInteracting(true);
+    if (timer) clearInterval(timer);
+    setProgress(0);
+  }, [emblaApi, timer]);
+  
+  const scrollNext = useCallback(() => {
+    emblaApi && emblaApi.scrollNext();
+    setIsInteracting(true);
+    if (timer) clearInterval(timer);
+    setProgress(0);
+  }, [emblaApi, timer]);
 
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', () => {
         setIsInteracting(true);
-        setProgress(0);
         if (timer) clearInterval(timer);
+        setProgress(0);
     });
      emblaApi.on('settle', () => {
-      setIsInteracting(false);
+      // When scrolling settles, if not hovering, restart autoplay
+      if (!isHovering) {
+        startAutoplay();
+      }
     });
-    // Clean up listeners
+
     return () => {
       emblaApi.off('select', onSelect);
     };
-  }, [emblaApi, onSelect, timer]);
+  }, [emblaApi, onSelect, timer, isHovering, startAutoplay]);
 
   useEffect(() => {
     if (initialSlideIndex !== -1 && emblaApi) {
@@ -139,12 +148,12 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-800 z-20">
-            <motion.div
+            {(progress > 0) && <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
                 transition={{ duration: 0.1, ease: "linear" }}
-            />
+            />}
         </div>
 
         <div className="overflow-hidden h-full" ref={emblaRef}>
@@ -162,7 +171,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         </div>
         
         <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-20">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center">
             
             <AnimatePresence>
               <motion.div
@@ -170,7 +179,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-12'>
+                className='pointer-events-auto self-start mb-6'>
                 <span className="text-2xl md:text-3xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
                 <span className="text-base md:text-lg text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
@@ -186,11 +195,11 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-9xl lg:text-[10rem] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
-                        <div className="flex flex-wrap gap-x-6 md:gap-x-8 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
-                            <p><span className="text-muted-foreground">Genre: </span><span className="text-foreground">{activeFilm.genre}</span></p>
-                            <p><span className="text-muted-foreground">Dauer: </span><span className="text-foreground">{activeFilm.duration}</span></p>
-                            <p><span className="text-muted-foreground">Sprache: </span><span className="text-foreground">{activeFilm.language}</span></p>
+                        <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs md:text-sm font-mono uppercase tracking-wider">
+                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
+                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
+                            <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
                         </div>
                         <div className="mt-8 flex items-center gap-4">
                             <motion.button 

@@ -39,13 +39,29 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     if (!emblaApi) return;
     setActiveIndex(emblaApi.selectedScrollSnap());
     setProgress(0);
-    setIsInteracting(false);
+    setIsInteracting(false); // Reset interaction state on new slide
+  }, [emblaApi]);
+
+  const scrollPrev = useCallback(() => {
+    emblaApi && emblaApi.scrollPrev();
+    setIsInteracting(true);
+    setProgress(0); // Reset progress on interaction
+  }, [emblaApi]);
+  
+  const scrollNext = useCallback(() => {
+    emblaApi && emblaApi.scrollNext();
+    setIsInteracting(true);
+    setProgress(0); // Reset progress on interaction
   }, [emblaApi]);
 
   useEffect(() => {
     if (!emblaApi) return;
     emblaApi.on('select', onSelect);
-    emblaApi.on('pointerDown', () => setIsInteracting(true));
+    emblaApi.on('pointerDown', () => {
+        setIsInteracting(true);
+        setProgress(0);
+    });
+    // Clean up listeners
     return () => {
       emblaApi.off('select', onSelect);
     };
@@ -84,15 +100,6 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     return () => clearInterval(interval);
   }, [emblaApi, isHovering, isInteracting]);
   
-  const scrollPrev = useCallback(() => {
-    emblaApi && emblaApi.scrollPrev();
-    setIsInteracting(true);
-  }, [emblaApi]);
-  const scrollNext = useCallback(() => {
-    emblaApi && emblaApi.scrollNext();
-    setIsInteracting(true);
-  }, [emblaApi]);
-
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') scrollNext();
@@ -114,7 +121,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gray-800 z-20">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-800 z-20">
             <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
@@ -137,7 +144,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/40 to-transparent">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/70 to-transparent">
           <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center">
             
             <AnimatePresence>
@@ -146,8 +153,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-6'>
-                <span className="text-3xl md:text-4xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                className='pointer-events-auto self-start mb-8'>
+                <span className="text-2xl md:text-3xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
                 <span className="text-base md:text-lg text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
             </AnimatePresence>
@@ -162,8 +169,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-headline leading-none whitespace-nowrap">{activeFilm.title}</h1>
-                        <div className="flex gap-x-4 md:gap-x-6 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
+                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-headline leading-none">{activeFilm.title}</h1>
+                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
                             <span>{activeFilm.genre}</span>
                             <span>{activeFilm.duration}</span>
                             <span>{activeFilm.language}</span>

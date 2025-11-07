@@ -8,13 +8,13 @@ type HeroSlideProps = {
   film: Film;
   isActive: boolean;
   isMuted: boolean;
-  hasInteracted: boolean;
+  hasInteracted: boolean; // Keep this to know if the user has engaged
 };
 
 export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Define a reusable play function
+  // Define a reusable play function that handles errors
   const playVideo = async () => {
     const video = videoRef.current;
     if (video) {
@@ -23,12 +23,13 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
                 await video.play();
             }
         } catch (error) {
-            console.error("Video autoplay was prevented:", error);
+            // This error is expected on mobile before user interaction
+            console.log("Video play was prevented by the browser. Awaiting user interaction.");
         }
     }
   };
 
-  // Create a custom play function on the video element for the parent to call
+  // Expose the play function for the parent component to call it
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -40,7 +41,8 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
     const video = videoRef.current;
     if (!video) return;
   
-    if (isActive && hasInteracted) {
+    // On desktop (and after interaction on mobile), play the video if it's active
+    if (isActive) {
       playVideo();
     } else {
       video.pause();
@@ -48,7 +50,7 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
         video.currentTime = 0;
       }
     }
-  }, [isActive, hasInteracted, film.trailer_url]); // Rerun when hasInteracted changes
+  }, [isActive, hasInteracted, film.trailer_url]); // Re-run when active status or interaction status changes
 
   useEffect(() => {
      if(videoRef.current) {

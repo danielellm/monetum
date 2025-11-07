@@ -49,11 +49,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const attemptToPlayVideo = useCallback(() => {
     if (!emblaApi) return;
     const slides = emblaApi.slideNodes();
-    // Loop through all slides to find videos, not just the active one
     slides.forEach((slide, index) => {
         const video = slide?.querySelector('video');
         if (video && (video as any).customPlay) {
-            // Play if it's the active slide, otherwise pause
             if (index === emblaApi.selectedScrollSnap()) {
                 (video as any).customPlay();
             } else {
@@ -63,37 +61,29 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     });
   }, [emblaApi]);
   
-  // This effect runs when the user first interacts with the page (scroll, click, etc.)
+  const handleUserInteraction = useCallback(() => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      attemptToPlayVideo(); // Try playing immediately on first interaction
+    }
+  }, [hasInteracted, attemptToPlayVideo]);
+
+  // This effect sets up listeners for the very first user interaction.
   useEffect(() => {
     if (hasInteracted) return;
-    const onFirstInteraction = () => {
-      setHasInteracted(true);
-      window.removeEventListener('scroll', onFirstInteraction);
-      window.removeEventListener('click', onFirstInteraction);
-      window.removeEventListener('touchstart', onFirstInteraction);
-      window.removeEventListener('keydown', onFirstInteraction);
-    };
-
-    window.addEventListener('scroll', onFirstInteraction, { once: true });
-    window.addEventListener('click', onFirstInteraction, { once: true });
-    window.addEventListener('touchstart', onFirstInteraction, { once: true });
-    window.addEventListener('keydown', onFirstInteraction, { once: true });
+    
+    window.addEventListener('scroll', handleUserInteraction, { once: true });
+    window.addEventListener('click', handleUserInteraction, { once: true });
+    window.addEventListener('touchstart', handleUserInteraction, { once: true });
+    window.addEventListener('keydown', handleUserInteraction, { once: true });
 
     return () => {
-      window.removeEventListener('scroll', onFirstInteraction);
-      window.removeEventListener('click', onFirstInteraction);
-      window.removeEventListener('touchstart', onFirstInteraction);
-      window.removeEventListener('keydown', onFirstInteraction);
+      window.removeEventListener('scroll', handleUserInteraction);
+      window.removeEventListener('click', handleUserInteraction);
+      window.removeEventListener('touchstart', handleUserInteraction);
+      window.removeEventListener('keydown', handleUserInteraction);
     };
-  }, [hasInteracted]);
-
-  // When `hasInteracted` becomes true, try to play the current video.
-  useEffect(() => {
-    if (hasInteracted) {
-      attemptToPlayVideo();
-    }
-  }, [hasInteracted, attemptToPlayVideo, activeIndex]);
-
+  }, [hasInteracted, handleUserInteraction]);
 
   const clearAutoplayTimer = useCallback(() => {
     if (autoplayTimer.current) {
@@ -104,8 +94,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    // Only start autoplay if the user isn't hovering and has interacted
-    if (isHovering || !hasInteracted) return;
+    if (isHovering) return;
 
     setProgress(0);
     const timer = setInterval(() => {
@@ -117,7 +106,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer, isHovering, hasInteracted]);
+  }, [clearAutoplayTimer, isHovering]);
 
   useEffect(() => {
       if (progress >= 100) {
@@ -127,13 +116,13 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
-    if (!hasInteracted) setHasInteracted(true);
+    handleUserInteraction(); // Signal interaction
     
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay, hasInteracted]);
+  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -152,12 +141,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       const newIndex = emblaApi.selectedScrollSnap();
       setActiveIndex(newIndex);
       setProgress(0);
-      if (hasInteracted && !isHovering) {
+      if (!isHovering) {
         startAutoplay();
       }
-      if (hasInteracted) {
-        attemptToPlayVideo();
-      }
+      attemptToPlayVideo();
     };
     
     const onPointerDown = () => {
@@ -168,25 +155,25 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('pointerDown', onPointerDown);
 
     // Initial start
-    if (hasInteracted && !isHovering) {
-        startAutoplay();
-    }
+    startAutoplay();
+    // Attempt to play on load, will be blocked on mobile until interaction
+    attemptToPlayVideo(); 
   
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, hasInteracted, attemptToPlayVideo]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo]);
 
   useEffect(() => {
     if (isHovering) {
         clearAutoplayTimer();
         setProgress(0);
-    } else if (hasInteracted) { // Only restart autoplay if interaction has happened
+    } else {
         startAutoplay();
     }
-  }, [isHovering, clearAutoplayTimer, startAutoplay, hasInteracted]);
+  }, [isHovering, clearAutoplayTimer, startAutoplay]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -246,10 +233,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-black/20 via-black/50 to-black/95 pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-t from-black/90 via-black/50 to-black/10 pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
             
-            <div className="w-full pointer-events-none">
+            <div className="w-full">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}

@@ -8,44 +8,53 @@ type HeroSlideProps = {
   film: Film;
   isActive: boolean;
   isMuted: boolean;
-  attemptPlay: () => void;
+  hasInteracted: boolean;
 };
 
-export default function HeroSlide({ film, isActive, isMuted, attemptPlay }: HeroSlideProps) {
+export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Define a reusable play function
+  const playVideo = async () => {
+    const video = videoRef.current;
+    if (video) {
+        try {
+            if (video.paused) {
+                await video.play();
+            }
+        } catch (error) {
+            console.error("Video autoplay was prevented:", error);
+        }
+    }
+  };
+
+  // Create a custom play function on the video element for the parent to call
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    (video as any).customPlay = playVideo;
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
   
-    if (isActive) {
-      video.load(); 
-      attemptPlay();
+    if (isActive && hasInteracted) {
+      playVideo();
     } else {
       video.pause();
-      video.currentTime = 0;
+      if (video.currentTime !== 0) {
+        video.currentTime = 0;
+      }
     }
-  }, [isActive, film.trailer_url, attemptPlay]);
+  }, [isActive, hasInteracted, film.trailer_url]); // Rerun when hasInteracted changes
 
   useEffect(() => {
      if(videoRef.current) {
         videoRef.current.muted = isMuted;
      }
   }, [isMuted]);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    // This is the function we'll call to try playing
-    (video as any).customPlay = async () => {
-        try {
-            await video.play();
-        } catch (error) {
-            console.error("Video autoplay was prevented:", error);
-        }
-    };
-  }, []);
 
   return (
     <motion.div
@@ -60,7 +69,7 @@ export default function HeroSlide({ film, isActive, isMuted, attemptPlay }: Hero
         className="w-full h-full object-cover"
         loop
         playsInline
-        muted // Muted by default, controlled by parent state
+        muted // Always start muted, parent controls via isMuted prop
         preload="auto"
         src={film.trailer_url}
         poster={film.poster_url}

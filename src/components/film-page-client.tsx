@@ -49,39 +49,50 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const attemptToPlayVideo = useCallback(() => {
     if (!emblaApi) return;
     const slides = emblaApi.slideNodes();
-    const activeSlide = slides[activeIndex];
-    const video = activeSlide?.querySelector('video');
-    if (video && (video as any).customPlay) {
-      (video as any).customPlay();
-    }
-  }, [emblaApi, activeIndex]);
+    // Loop through all slides to find videos, not just the active one
+    slides.forEach((slide, index) => {
+        const video = slide?.querySelector('video');
+        if (video && (video as any).customPlay) {
+            // Play if it's the active slide, otherwise pause
+            if (index === emblaApi.selectedScrollSnap()) {
+                (video as any).customPlay();
+            } else {
+                video.pause();
+            }
+        }
+    });
+  }, [emblaApi]);
   
   // This effect runs when the user first interacts with the page (scroll, click, etc.)
   useEffect(() => {
+    if (hasInteracted) return;
     const onFirstInteraction = () => {
       setHasInteracted(true);
-      window.removeEventListener('scroll', onFirstInteraction, { once: true });
-      window.removeEventListener('click', onFirstInteraction, { once: true });
-      window.removeEventListener('touchstart', onFirstInteraction, { once: true });
+      window.removeEventListener('scroll', onFirstInteraction);
+      window.removeEventListener('click', onFirstInteraction);
+      window.removeEventListener('touchstart', onFirstInteraction);
+      window.removeEventListener('keydown', onFirstInteraction);
     };
 
     window.addEventListener('scroll', onFirstInteraction, { once: true });
     window.addEventListener('click', onFirstInteraction, { once: true });
     window.addEventListener('touchstart', onFirstInteraction, { once: true });
+    window.addEventListener('keydown', onFirstInteraction, { once: true });
 
     return () => {
       window.removeEventListener('scroll', onFirstInteraction);
       window.removeEventListener('click', onFirstInteraction);
       window.removeEventListener('touchstart', onFirstInteraction);
+      window.removeEventListener('keydown', onFirstInteraction);
     };
-  }, []);
+  }, [hasInteracted]);
 
   // When `hasInteracted` becomes true, try to play the current video.
   useEffect(() => {
     if (hasInteracted) {
       attemptToPlayVideo();
     }
-  }, [hasInteracted, attemptToPlayVideo]);
+  }, [hasInteracted, attemptToPlayVideo, activeIndex]);
 
 
   const clearAutoplayTimer = useCallback(() => {
@@ -93,6 +104,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
+    // Only start autoplay if the user isn't hovering and has interacted
+    if (isHovering || !hasInteracted) return;
+
     setProgress(0);
     const timer = setInterval(() => {
         setProgress(prev => {
@@ -103,7 +117,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer]);
+  }, [clearAutoplayTimer, isHovering, hasInteracted]);
 
   useEffect(() => {
       if (progress >= 100) {
@@ -114,6 +128,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
     if (!hasInteracted) setHasInteracted(true);
+    
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
@@ -134,10 +149,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     if (!emblaApi) return;
 
     const onSelect = () => {
-      setActiveIndex(emblaApi.selectedScrollSnap());
+      const newIndex = emblaApi.selectedScrollSnap();
+      setActiveIndex(newIndex);
       setProgress(0);
-      if (!isHovering) {
+      if (hasInteracted && !isHovering) {
         startAutoplay();
+      }
+      if (hasInteracted) {
+        attemptToPlayVideo();
       }
     };
     
@@ -148,7 +167,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
 
-    if (!isHovering) {
+    // Initial start
+    if (hasInteracted && !isHovering) {
         startAutoplay();
     }
   
@@ -157,16 +177,16 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, hasInteracted, attemptToPlayVideo]);
 
   useEffect(() => {
     if (isHovering) {
         clearAutoplayTimer();
         setProgress(0);
-    } else {
+    } else if (hasInteracted) { // Only restart autoplay if interaction has happened
         startAutoplay();
     }
-  }, [isHovering, clearAutoplayTimer, startAutoplay]);
+  }, [isHovering, clearAutoplayTimer, startAutoplay, hasInteracted]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -197,8 +217,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   return (
     <main
       className="bg-background text-foreground"
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={() => { if(!isHovering) setIsHovering(true); }}
+      onMouseLeave={() => { if(isHovering) setIsHovering(false); }}
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
@@ -218,18 +238,18 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <HeroSlide
                   film={film}
                   isActive={index === activeIndex}
-                  isMuted={isHovering}
-                  attemptPlay={attemptToPlayVideo}
+                  isMuted={!isHovering}
+                  hasInteracted={hasInteracted}
                 />
               </div>
             ))}
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-black/20 via-black/50 to-black pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-black/20 via-black/50 to-black/95 pointer-events-none">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
             
-            <div className="w-full">
+            <div className="w-full pointer-events-none">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}
@@ -252,7 +272,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words pointer-events-auto">{activeFilm.title}</h1>
+                            <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                             <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                                <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>

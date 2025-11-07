@@ -42,25 +42,25 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
       autoplayTimer.current = null;
     }
   }, []);
-
+  
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    const newTimer = setInterval(() => {
-      setProgress(p => {
-        if (p >= 100) {
+    setProgress(0); // Reset progress before starting
+    const timer = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
           emblaApi?.scrollNext();
           return 0;
         }
-        return p + (100 / (AUTOPLAY_DURATION / 100));
+        return prev + 100 / (AUTOPLAY_DURATION / 100);
       });
     }, 100);
-    autoplayTimer.current = newTimer;
+    autoplayTimer.current = timer;
   }, [clearAutoplayTimer, emblaApi]);
 
   const onInteraction = useCallback(() => {
     clearAutoplayTimer();
     setProgress(0);
-    // Restart autoplay after a delay
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
   }, [clearAutoplayTimer, startAutoplay]);
@@ -80,27 +80,34 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     setActiveIndex(emblaApi.selectedScrollSnap());
     setProgress(0); // Reset progress on manual slide change
   }, [emblaApi]);
-
+  
   useEffect(() => {
     if (!emblaApi) return;
-
-    emblaApi.on('select', onSelect);
+  
+    const handleSelect = () => {
+      if (!emblaApi) return;
+      setActiveIndex(emblaApi.selectedScrollSnap());
+      setProgress(0);
+      // When a slide is selected, restart the autoplay timer
+      onInteraction();
+    };
+  
+    emblaApi.on('select', handleSelect);
     emblaApi.on('pointerDown', onInteraction);
-    
-    // Autoplay logic
-    if (isHovering) {
-        clearAutoplayTimer();
-        setProgress(0);
+  
+    if (!isHovering) {
+      startAutoplay();
     } else {
-        startAutoplay();
+      clearAutoplayTimer();
+      setProgress(0);
     }
-
+  
     return () => {
-      emblaApi.off('select', onSelect);
+      emblaApi.off('select', handleSelect);
       emblaApi.off('pointerDown', onInteraction);
       clearAutoplayTimer();
     };
-  }, [emblaApi, onSelect, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -136,7 +143,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-0.5 bg-gray-800/50 z-20">
+        <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
             {!isHovering && progress > 0 && <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
@@ -159,7 +166,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/95 via-black/70 to-transparent">
+        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent/20">
           <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[10vh]">
             
             <AnimatePresence>
@@ -168,8 +175,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-6 md:mb-8'>
-                <span className="text-xl md:text-2xl text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                className='pointer-events-auto self-start mb-4'>
+                <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                 <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
             </AnimatePresence>

@@ -185,7 +185,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-transparent to-black/95 pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-black/0 via-black/30 to-black/95 pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
             
             <div className="w-full">
@@ -260,7 +260,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       </AnimatePresence>
 
       <div className="bg-background py-8 md:py-12">
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 flex items-center gap-4">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 flex justify-end items-center gap-4">
           <motion.button 
               onClick={scrollPrev} 
               className="p-2 text-white hover:text-primary transition-colors group"

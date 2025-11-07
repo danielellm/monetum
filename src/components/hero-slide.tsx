@@ -17,11 +17,29 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
     const video = videoRef.current;
     if (!video) return;
 
+    const playVideo = () => {
+      video.play().catch(error => {
+        // Autoplay was prevented.
+        console.error("Video play was prevented:", error);
+      });
+    };
+
     if (isActive) {
-      video.play().catch(error => console.error("Video play failed:", error));
+      // Check if video is already ready to play
+      if (video.readyState >= 3) { // HAVE_FUTURE_DATA
+        playVideo();
+      } else {
+        // If not, wait for it to be ready
+        video.addEventListener('canplay', playVideo, { once: true });
+      }
     } else {
       video.pause();
       video.currentTime = 0;
+    }
+    
+    // Cleanup event listener
+    return () => {
+      video.removeEventListener('canplay', playVideo);
     }
   }, [isActive]);
 
@@ -47,6 +65,7 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
         muted // Muted by default, controlled by parent state
         preload="auto"
         src={film.trailer_url}
+        poster={film.poster_url}
       />
     </motion.div>
   );

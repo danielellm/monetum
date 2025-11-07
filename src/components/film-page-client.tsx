@@ -5,11 +5,12 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
 import Footer from './footer';
-import NavigationArrows from './navigation-arrows';
+import Header from './header';
 
 type FilmPageClientProps = {
   films: Film[];
@@ -59,20 +60,16 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
     if (newSlug && newSlug !== initialSlug) {
-      // Update URL without full reload and without scrolling to top
       router.push(`/filme/${newSlug}`, { scroll: false });
     }
-    // Preload next and previous films
     if (emblaApi) {
         const nextIndex = (activeIndex + 1) % films.length;
         const prevIndex = (activeIndex - 1 + films.length) % films.length;
         router.prefetch(`/filme/${films[nextIndex].slug}`);
         router.prefetch(`/filme/${films[prevIndex].slug}`);
     }
-
   }, [activeIndex, films, router, initialSlug, emblaApi]);
 
-  // Autoplay progress effect
   useEffect(() => {
     if (isHovering || isInteracting) return;
     const interval = setInterval(() => {
@@ -87,8 +84,14 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     return () => clearInterval(interval);
   }, [emblaApi, isHovering, isInteracting]);
   
-  const scrollPrev = useCallback(() => emblaApi && emblaApi.scrollPrev(), [emblaApi]);
-  const scrollNext = useCallback(() => emblaApi && emblaApi.scrollNext(), [emblaApi]);
+  const scrollPrev = useCallback(() => {
+    emblaApi && emblaApi.scrollPrev();
+    setIsInteracting(true);
+  }, [emblaApi]);
+  const scrollNext = useCallback(() => {
+    emblaApi && emblaApi.scrollNext();
+    setIsInteracting(true);
+  }, [emblaApi]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -100,7 +103,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   }, [scrollNext, scrollPrev]);
 
   if (!activeFilm) {
-    return null; // Or a not found component
+    return null;
   }
 
   return (
@@ -109,6 +112,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
     >
+      <Header />
       <div className="relative h-screen w-full overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-1 bg-gray-800 z-20">
             <motion.div
@@ -132,24 +136,44 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
             ))}
           </div>
         </div>
-
-        <div className="absolute inset-0 z-10 flex flex-col justify-end p-8 md:p-12 bg-gradient-to-t from-black/70 via-black/30 to-transparent pointer-events-none">
+        
+        {/* New Layout Overlay */}
+        <div className="absolute inset-0 z-10 flex flex-col justify-center p-8 md:p-12 pointer-events-none bg-gradient-to-b from-black/50 via-transparent to-black/90">
             <AnimatePresence mode="wait">
                  <motion.div
                     key={activeFilm.id}
+                    className="w-full max-w-6xl mx-auto pointer-events-auto"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ duration: 0.6 }}
                   >
-                    <h2 className="text-sm tracking-widest uppercase text-gray-300">{activeFilm.subtitle}</h2>
-                    <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-headline mt-2">{activeFilm.title}</h1>
+                    <div className='absolute top-[-15vh] md:top-[-20vh] left-0'>
+                      <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                      <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+                    </div>
+
+                    <div className="flex flex-col items-start text-left">
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-headline">{activeFilm.title}</h1>
+                        <div className="flex gap-x-4 md:gap-x-6 mt-4 text-xs md:text-sm text-gray-300 font-mono">
+                            <span>{activeFilm.genre}</span>
+                            <span>&bull;</span>
+                            <span>{activeFilm.duration}</span>
+                            <span>&bull;</span>
+                            <span>{activeFilm.language}</span>
+                        </div>
+                        <div className="mt-6 flex items-center gap-4">
+                            <button onClick={scrollPrev} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors">
+                                <ChevronLeft className="h-6 w-6 md:h-8 md:w-8" />
+                            </button>
+                             <button onClick={scrollNext} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors">
+                                <ChevronRight className="h-6 w-6 md:h-8 md:w-8" />
+                            </button>
+                        </div>
+                    </div>
                  </motion.div>
             </AnimatePresence>
-            <div className="mt-4 text-xs font-mono">{`${activeIndex + 1} / ${films.length}`}</div>
         </div>
-
-        <NavigationArrows onPrev={scrollPrev} onNext={scrollNext} />
       </div>
 
       <AnimatePresence mode="wait">

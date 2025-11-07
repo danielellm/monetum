@@ -48,7 +48,6 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
         preload="auto"
         src={film.trailer_url}
       />
-      <div className="absolute inset-0 bg-black/30" />
     </motion.div>
   );
 }

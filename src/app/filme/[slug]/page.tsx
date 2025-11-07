@@ -50,18 +50,18 @@ export async function generateStaticParams() {
 }
 
 export default async function FilmPage({ params }: Props) {
-  // Fetch all films and sort them by slider_position to ensure correct order
+  // Fetch all films. The sorting will now be handled inside the client component.
   const films: Film[] = await getFilms();
-  const sortedFilms = films.sort((a, b) => a.slider_position - b.slider_position);
+  
+  // Find the currently active film based on the slug to validate it exists
+  const currentFilmExists = films.some(f => f.slug === params.slug);
 
-  // Find the currently active film based on the slug
-  const currentFilm = sortedFilms.find(f => f.slug === params.slug);
-
-  if (!currentFilm) {
+  if (!currentFilmExists) {
     // If the film is not found, show a 404 page
     notFound();
   }
 
-  // Pass the sorted list of films and the initial slug to the client component
-  return <FilmPageClient films={sortedFilms} initialSlug={params.slug} />;
+  // Pass the unsorted list of films and the initial slug to the client component
+  // The client component is now responsible for sorting
+  return <FilmPageClient films={films} initialSlug={params.slug} />;
 }

@@ -19,8 +19,15 @@ type FilmPageClientProps = {
 
 const AUTOPLAY_DURATION = 12000; // 12 seconds
 
-export default function FilmPageClient({ films, initialSlug }: FilmPageClientProps) {
+export default function FilmPageClient({ films: unsortedFilms, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
+  
+  // Ensure films are always sorted by slider_position
+  const films = useMemo(() => 
+    [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position), 
+    [unsortedFilms]
+  );
+
   const initialSlideIndex = useMemo(() => films.findIndex((f) => f.slug === initialSlug), [films, initialSlug]);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
@@ -74,12 +81,6 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
     emblaApi?.scrollNext();
     onInteraction();
   }, [emblaApi, onInteraction]);
-
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setActiveIndex(emblaApi.selectedScrollSnap());
-    setProgress(0); // Reset progress on manual slide change
-  }, [emblaApi]);
   
   useEffect(() => {
     if (!emblaApi) return;
@@ -88,7 +89,6 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
       if (!emblaApi) return;
       setActiveIndex(emblaApi.selectedScrollSnap());
       setProgress(0);
-      // When a slide is selected, restart the autoplay timer
       onInteraction();
     };
   
@@ -166,8 +166,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent/20">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[10vh]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/95 to-transparent/20">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[15vh]">
             
             <AnimatePresence>
               <motion.div
@@ -191,7 +191,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-[140px] lg:text-[180px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <h1 className="text-7xl md:text-[150px] lg:text-[190px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                         <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>

@@ -60,7 +60,7 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
     if (newSlug && newSlug !== initialSlug) {
-      router.push(`/filme/${newSlug}`, { scroll: false });
+      window.history.pushState({}, '', `/filme/${newSlug}`);
     }
     if (emblaApi) {
         const nextIndex = (activeIndex + 1) % films.length;
@@ -138,37 +138,56 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         </div>
         
         {/* New Layout Overlay */}
-        <div className="absolute inset-0 z-10 flex flex-col justify-end items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/90 via-transparent">
-          <div className="w-full max-w-6xl mx-auto relative h-full">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black/90 via-black/30 to-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex items-center">
             
-            <div className='absolute top-[25vh] md:top-[20vh] left-0 pointer-events-auto'>
-              <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
-              <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
-            </div>
+            <AnimatePresence>
+              <motion.div
+                key={`counter-${activeFilm.id}`}
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
+                exit={{ opacity: 0 }}
+                className='absolute top-[20vh] md:top-[15vh] left-0 pointer-events-auto'>
+                <span className="text-6xl md:text-8xl font-bold text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                <span className="text-2xl md:text-4xl text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+              </motion.div>
+            </AnimatePresence>
 
             <AnimatePresence mode="wait">
                  <motion.div
                     key={activeFilm.id}
-                    className="w-full pointer-events-auto absolute bottom-0 left-0"
-                    initial={{ opacity: 0, y: 20 }}
+                    className="w-full pointer-events-auto"
+                    initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.6 }}
+                    exit={{ opacity: 0, y: -30 }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
-                    <div className="flex flex-col items-start text-left mb-8 md:mb-12">
-                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-headline">{activeFilm.title}</h1>
-                        <div className="flex gap-x-4 md:gap-x-6 mt-4 text-xs md:text-sm text-primary font-mono">
+                    <div className="flex flex-col items-start text-left max-w-4xl">
+                        <h1 className="text-6xl md:text-8xl lg:text-9xl font-bold font-headline leading-none">{activeFilm.title}</h1>
+                        <div className="flex gap-x-4 md:gap-x-6 mt-6 text-sm md:text-base text-primary font-mono uppercase tracking-widest">
                             <span>{activeFilm.genre}</span>
                             <span>{activeFilm.duration}</span>
                             <span>{activeFilm.language}</span>
                         </div>
-                        <div className="mt-6 flex items-center gap-2">
-                            <button onClick={scrollPrev} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors border border-primary hover:bg-primary">
-                                <ArrowLeft className="h-5 w-5 md:h-6 md:w-6" />
-                            </button>
-                             <button onClick={scrollNext} className="pointer-events-auto p-2 text-primary hover:text-white transition-colors border border-primary hover:bg-primary">
-                                <ArrowRight className="h-5 w-5 md:h-6 md:w-6" />
-                            </button>
+                        <div className="mt-8 flex items-center gap-4">
+                            <motion.button 
+                                onClick={scrollPrev} 
+                                className="pointer-events-auto p-2 text-primary hover:text-white transition-colors group"
+                                whileHover="hover"
+                            >
+                                <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                                    <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
+                                </motion.div>
+                            </motion.button>
+                             <motion.button 
+                                onClick={scrollNext} 
+                                className="pointer-events-auto p-2 text-primary hover:text-white transition-colors group"
+                                whileHover="hover"
+                            >
+                                <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                                    <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
+                                </motion.div>
+                            </motion.button>
                         </div>
                     </div>
                  </motion.div>

@@ -98,14 +98,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
       setHasInteracted(true);
-      // The useEffect listening to hasInteracted will handle the rest
     }
   }, [hasInteracted]);
 
+  // Effect to handle state changes after first interaction
   useEffect(() => {
     if (hasInteracted) {
+      // attemptToPlayVideo might be needed here if videos don't play
       attemptToPlayVideo();
-      startAutoplay();
+      startAutoplay(); // Start autoplay only after first interaction
     }
   }, [hasInteracted, attemptToPlayVideo, startAutoplay]);
 
@@ -115,7 +116,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     isTouchDevice.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice.current) {
       setShowSwipeHint(true);
-      const timer = setTimeout(() => setShowSwipeHint(false), 3000); // Show hint for 3 seconds
+      const timer = setTimeout(() => setShowSwipeHint(false), 2500); // Show hint for 2.5 seconds
       return () => clearTimeout(timer);
     }
   }, []);
@@ -132,9 +133,12 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     
     clearAutoplayTimer();
     setProgress(0);
-    const restartTimer = setTimeout(startAutoplay, 5000); 
-    return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction]);
+    // Only restart autoplay if it's not a touch device OR if it is a touch device AND there has been interaction
+    if (!isTouchDevice.current || (isTouchDevice.current && hasInteracted)) {
+      const restartTimer = setTimeout(startAutoplay, 5000); 
+      return () => clearTimeout(restartTimer);
+    }
+  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -154,7 +158,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       setActiveIndex(newIndex);
       setProgress(0);
       attemptToPlayVideo(emblaApi);
-      if (!isHovering) {
+       if (!isHovering) {
         startAutoplay();
       }
     };
@@ -185,9 +189,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         clearAutoplayTimer();
         setProgress(0);
     } else {
-        startAutoplay();
+       if (!isTouchDevice.current || hasInteracted) {
+         startAutoplay();
+       }
     }
-  }, [isHovering, startAutoplay, clearAutoplayTimer]);
+  }, [isHovering, startAutoplay, clearAutoplayTimer, hasInteracted]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -220,7 +226,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       className="bg-background text-foreground"
       onMouseEnter={() => { if(!isTouchDevice.current && !isHovering) setIsHovering(true); }}
       onMouseLeave={() => { if(!isTouchDevice.current && isHovering) setIsHovering(false); }}
-      onClick={handleUserInteraction}
+      onClick={handleUserInteraction} // Use main element for interaction detection
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
@@ -265,10 +271,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             )}
         </AnimatePresence>
 
-        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full pointer-events-none" onClick={(e) => e.stopPropagation()}>
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}

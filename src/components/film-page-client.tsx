@@ -185,7 +185,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start pointer-events-none bg-gradient-to-t from-black/80 via-black/50 to-transparent">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-center items-start">
             
             <div className="w-full">
@@ -195,7 +195,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                     exit={{ opacity: 0 }}
-                    className='pointer-events-auto self-start mb-4'>
+                    className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
                   </motion.div>
@@ -204,7 +204,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <AnimatePresence mode="wait">
                      <motion.div
                         key={activeFilm.id}
-                        className="w-full pointer-events-auto"
+                        className="w-full"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -30 }}
@@ -221,10 +221,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                      </motion.div>
                 </AnimatePresence>
 
-                 <div className="flex items-center gap-4 mt-32">
+                 <div className="flex items-center gap-4 mt-32 pointer-events-auto">
                     <motion.button 
                         onClick={scrollPrev} 
-                        className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                        className="p-2 text-white hover:text-primary transition-colors group"
                         whileHover="hover"
                     >
                         <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
@@ -233,7 +233,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     </motion.button>
                      <motion.button 
                         onClick={scrollNext} 
-                        className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"
+                        className="p-2 text-white hover:text-primary transition-colors group"
                         whileHover="hover"
                     >
                         <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>

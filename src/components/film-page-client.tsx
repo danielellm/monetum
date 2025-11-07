@@ -22,7 +22,7 @@ const AUTOPLAY_DURATION = 12000; // 12 seconds
 export default function FilmPageClient({ films: unsortedFilms, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
   
-  // 1. Sort films immediately
+  // 1. Sort films immediately based on slider_position
   const films = useMemo(() => 
     [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position),
     [unsortedFilms]
@@ -34,9 +34,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     [films, initialSlug]
   );
   
+  // 3. Initialize Embla with the correct starting index
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    // 3. Ensure the startIndex is valid before passing it
     startIndex: initialSlideIndex >= 0 ? initialSlideIndex : 0,
   });
   
@@ -46,6 +46,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
 
+  // This will now correctly reference the film from the sorted array
   const activeFilm = films[activeIndex];
 
   const clearAutoplayTimer = useCallback(() => {
@@ -78,28 +79,31 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   }, [progress, emblaApi]);
   
   const onInteraction = useCallback(() => {
+    if (!emblaApi) return;
     clearAutoplayTimer();
-    setProgress(0);
+    setProgress(0); // Reset progress on user interaction
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [clearAutoplayTimer, startAutoplay]);
+  }, [emblaApi, clearAutoplayTimer, startAutoplay]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
-  }, [emblaApi]);
+    onInteraction();
+  }, [emblaApi, onInteraction]);
   
   const scrollNext = useCallback(() => {
     emblaApi?.scrollNext();
-  }, [emblaApi]);
+    onInteraction();
+  }, [emblaApi, onInteraction]);
   
   useEffect(() => {
     if (!emblaApi) return;
 
     const onSelect = () => {
       setActiveIndex(emblaApi.selectedScrollSnap());
-      setProgress(0); // Reset progress on any interaction
+      setProgress(0); // Reset progress on any slide change
       if (!isHovering) {
-        onInteraction();
+        startAutoplay(); // Restart autoplay timer
       }
     };
     
@@ -155,6 +159,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   }, [scrollNext, scrollPrev]);
 
   if (!activeFilm) {
+    // Render a loading state or null if films are not yet available.
     return null;
   }
 
@@ -189,8 +194,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/95 to-transparent/20">
-          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[15vh]">
+        <div className="absolute inset-0 z-10 flex flex-col items-center p-8 md:p-12 pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
+          <div className="w-full max-w-6xl mx-auto relative h-full flex flex-col justify-center pb-[20vh] md:pb-[15vh]">
             
             <AnimatePresence>
               <motion.div
@@ -214,7 +219,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-[150px] lg:text-[190px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                        <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                         <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
@@ -223,7 +228,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     </div>
                  </motion.div>
             </AnimatePresence>
-             <div className="absolute bottom-0 left-0 flex items-center gap-4 mt-8">
+             <div className="absolute -bottom-8 left-0 flex items-center gap-4 mt-8">
                 <motion.button 
                     onClick={scrollPrev} 
                     className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"

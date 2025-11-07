@@ -253,7 +253,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     animate={{ opacity: [0, 1, 1, 0] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 4, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-20 inset-0 flex items-center justify-center pointer-events-none"
+                    className="absolute z-30 top-24 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
                 >
                     <div className="flex items-center gap-2 bg-black/50 text-white p-3 rounded-lg">
                         <MoveHorizontal className="w-6 h-6"/>
@@ -341,3 +341,4 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     </main>
   );
 }
+ 

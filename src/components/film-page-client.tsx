@@ -185,8 +185,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start pointer-events-none bg-gradient-to-t from-black/80 via-black/50 to-transparent">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-center items-start">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-transparent to-black/95 pointer-events-none">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
             
             <div className="w-full">
                 <AnimatePresence>
@@ -258,6 +258,29 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             <FilmInfo film={activeFilm} />
         </motion.div>
       </AnimatePresence>
+
+      <div className="bg-background py-8 md:py-12">
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 flex items-center gap-4">
+          <motion.button 
+              onClick={scrollPrev} 
+              className="p-2 text-white hover:text-primary transition-colors group"
+              whileHover="hover"
+          >
+              <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                  <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
+              </motion.div>
+          </motion.button>
+            <motion.button 
+              onClick={scrollNext} 
+              className="p-2 text-white hover:text-primary transition-colors group"
+              whileHover="hover"
+          >
+              <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                  <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
+              </motion.div>
+          </motion.button>
+        </div>
+      </div>
 
       <Footer />
     </main>

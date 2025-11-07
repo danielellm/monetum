@@ -16,32 +16,27 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-
-    const playVideo = () => {
-      video.play().catch(error => {
-        // Autoplay was prevented.
-        console.error("Video play was prevented:", error);
-      });
-    };
-
-    if (isActive) {
-      // Check if video is already ready to play
-      if (video.readyState >= 3) { // HAVE_FUTURE_DATA
-        playVideo();
-      } else {
-        // If not, wait for it to be ready
-        video.addEventListener('canplay', playVideo, { once: true });
+  
+    const playVideo = async () => {
+      try {
+        await video.play();
+      } catch (error) {
+        console.error("Video autoplay was prevented:", error);
+        // On mobile, user interaction is often required.
+        // The poster image will be shown as a fallback.
       }
+    };
+  
+    if (isActive) {
+      // Resetting src to ensure the video reloads and can be played again
+      // This can help with some browser caching issues on navigation.
+      video.load(); 
+      playVideo();
     } else {
       video.pause();
       video.currentTime = 0;
     }
-    
-    // Cleanup event listener
-    return () => {
-      video.removeEventListener('canplay', playVideo);
-    }
-  }, [isActive]);
+  }, [isActive, film.trailer_url]); // Rerun when film changes
 
   useEffect(() => {
      if(videoRef.current) {
@@ -58,7 +53,7 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
     >
       <video
         ref={videoRef}
-        key={film.trailer_url}
+        key={film.trailer_url} // key helps React to re-create the element when src changes
         className="w-full h-full object-cover"
         loop
         playsInline

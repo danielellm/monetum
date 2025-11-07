@@ -188,14 +188,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
             
-            <div className="w-full pointer-events-auto">
+            <div className="w-full">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                     exit={{ opacity: 0 }}
-                    className='self-start mb-4 pointer-events-none'>
+                    className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
                   </motion.div>
@@ -204,7 +204,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <AnimatePresence mode="wait">
                      <motion.div
                         key={activeFilm.id}
-                        className="w-full pointer-events-none"
+                        className="w-full"
                         initial={{ opacity: 0, y: 30 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -30 }}
@@ -221,7 +221,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                      </motion.div>
                 </AnimatePresence>
 
-                 <div className="flex items-center gap-4 mt-16">
+                 <div className="flex items-center gap-4 mt-16 pointer-events-auto">
                     <motion.button 
                         onClick={scrollPrev} 
                         className="p-2 text-white hover:text-primary transition-colors group"

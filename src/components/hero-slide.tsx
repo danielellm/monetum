@@ -8,41 +8,44 @@ type HeroSlideProps = {
   film: Film;
   isActive: boolean;
   isMuted: boolean;
+  attemptPlay: () => void;
 };
 
-export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
+export default function HeroSlide({ film, isActive, isMuted, attemptPlay }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
   
-    const playVideo = async () => {
-      try {
-        await video.play();
-      } catch (error) {
-        console.error("Video autoplay was prevented:", error);
-        // On mobile, user interaction is often required.
-        // The poster image will be shown as a fallback.
-      }
-    };
-  
     if (isActive) {
-      // Resetting src to ensure the video reloads and can be played again
-      // This can help with some browser caching issues on navigation.
       video.load(); 
-      playVideo();
+      attemptPlay();
     } else {
       video.pause();
       video.currentTime = 0;
     }
-  }, [isActive, film.trailer_url]); // Rerun when film changes
+  }, [isActive, film.trailer_url, attemptPlay]);
 
   useEffect(() => {
      if(videoRef.current) {
         videoRef.current.muted = isMuted;
      }
   }, [isMuted]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    // This is the function we'll call to try playing
+    (video as any).customPlay = async () => {
+        try {
+            await video.play();
+        } catch (error) {
+            console.error("Video autoplay was prevented:", error);
+        }
+    };
+  }, []);
 
   return (
     <motion.div
@@ -53,7 +56,7 @@ export default function HeroSlide({ film, isActive, isMuted }: HeroSlideProps) {
     >
       <video
         ref={videoRef}
-        key={film.trailer_url} // key helps React to re-create the element when src changes
+        key={film.trailer_url}
         className="w-full h-full object-cover"
         loop
         playsInline

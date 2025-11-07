@@ -40,10 +40,49 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const [activeIndex, setActiveIndex] = useState(initialSlideIndex);
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
+  const [hasInteracted, setHasInteracted] = useState(false);
   
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
 
   const activeFilm = films[activeIndex];
+
+  const attemptToPlayVideo = useCallback(() => {
+    if (!emblaApi) return;
+    const slides = emblaApi.slideNodes();
+    const activeSlide = slides[activeIndex];
+    const video = activeSlide?.querySelector('video');
+    if (video && (video as any).customPlay) {
+      (video as any).customPlay();
+    }
+  }, [emblaApi, activeIndex]);
+  
+  // This effect runs when the user first interacts with the page (scroll, click, etc.)
+  useEffect(() => {
+    const onFirstInteraction = () => {
+      setHasInteracted(true);
+      window.removeEventListener('scroll', onFirstInteraction, { once: true });
+      window.removeEventListener('click', onFirstInteraction, { once: true });
+      window.removeEventListener('touchstart', onFirstInteraction, { once: true });
+    };
+
+    window.addEventListener('scroll', onFirstInteraction, { once: true });
+    window.addEventListener('click', onFirstInteraction, { once: true });
+    window.addEventListener('touchstart', onFirstInteraction, { once: true });
+
+    return () => {
+      window.removeEventListener('scroll', onFirstInteraction);
+      window.removeEventListener('click', onFirstInteraction);
+      window.removeEventListener('touchstart', onFirstInteraction);
+    };
+  }, []);
+
+  // When `hasInteracted` becomes true, try to play the current video.
+  useEffect(() => {
+    if (hasInteracted) {
+      attemptToPlayVideo();
+    }
+  }, [hasInteracted, attemptToPlayVideo]);
+
 
   const clearAutoplayTimer = useCallback(() => {
     if (autoplayTimer.current) {
@@ -74,11 +113,12 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
+    if (!hasInteracted) setHasInteracted(true);
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay]);
+  }, [emblaApi, clearAutoplayTimer, startAutoplay, hasInteracted]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -179,14 +219,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                   film={film}
                   isActive={index === activeIndex}
                   isMuted={isHovering}
+                  attemptPlay={attemptToPlayVideo}
                 />
               </div>
             ))}
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
+        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-b from-black/20 via-black/50 to-black pointer-events-none">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start pointer-events-none">
             
             <div className="w-full">
                 <AnimatePresence>
@@ -211,7 +252,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
+                            <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words pointer-events-auto">{activeFilm.title}</h1>
                             <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                                <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>

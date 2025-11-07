@@ -46,14 +46,17 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const activeFilm = films[activeIndex];
 
-  const attemptToPlayVideo = useCallback(() => {
-    if (!emblaApi) return;
-    const slides = emblaApi.slideNodes();
+  const attemptToPlayVideo = useCallback((api = emblaApi) => {
+    if (!api) return;
+    const slides = api.slideNodes();
     slides.forEach((slide, index) => {
         const video = slide?.querySelector('video');
-        if (video && (video as any).customPlay) {
-            if (index === emblaApi.selectedScrollSnap()) {
-                (video as any).customPlay();
+        if (video) {
+            if (index === api.selectedScrollSnap()) {
+                video.play().catch(err => {
+                  // Autoplay was prevented. This is expected on mobile.
+                  // The user will need to interact to start the video.
+                });
             } else {
                 video.pause();
             }
@@ -64,24 +67,23 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
       setHasInteracted(true);
-      attemptToPlayVideo(); // Try playing immediately on first interaction
+      // Attempt to play all videos now that we have user interaction
+      document.querySelectorAll('video').forEach(vid => {
+        vid.play().catch(err => console.log('Play after interaction failed.'));
+      });
+      attemptToPlayVideo(); 
     }
   }, [hasInteracted, attemptToPlayVideo]);
 
-  // This effect sets up listeners for the very first user interaction.
+  // Listen for the first user interaction
   useEffect(() => {
     if (hasInteracted) return;
     
-    window.addEventListener('scroll', handleUserInteraction, { once: true });
-    window.addEventListener('click', handleUserInteraction, { once: true });
-    window.addEventListener('touchstart', handleUserInteraction, { once: true });
-    window.addEventListener('keydown', handleUserInteraction, { once: true });
+    const events: (keyof WindowEventMap)[] = ['scroll', 'click', 'touchstart', 'keydown'];
+    events.forEach(event => window.addEventListener(event, handleUserInteraction, { once: true }));
 
     return () => {
-      window.removeEventListener('scroll', handleUserInteraction);
-      window.removeEventListener('click', handleUserInteraction);
-      window.removeEventListener('touchstart', handleUserInteraction);
-      window.removeEventListener('keydown', handleUserInteraction);
+      events.forEach(event => window.removeEventListener(event, handleUserInteraction));
     };
   }, [hasInteracted, handleUserInteraction]);
 
@@ -94,7 +96,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    if (isHovering) return;
+    // No autoplay on touch devices or if hovering
+    if (isHovering || 'ontouchstart' in window) return;
 
     setProgress(0);
     const timer = setInterval(() => {
@@ -116,7 +119,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
-    handleUserInteraction(); // Signal interaction
+    handleUserInteraction();
     
     clearAutoplayTimer();
     setProgress(0);
@@ -144,7 +147,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       if (!isHovering) {
         startAutoplay();
       }
-      attemptToPlayVideo();
+      if (hasInteracted || !('ontouchstart' in window)) {
+        attemptToPlayVideo(emblaApi);
+      }
     };
     
     const onPointerDown = () => {
@@ -154,17 +159,17 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
 
-    // Initial start
     startAutoplay();
-    // Attempt to play on load, will be blocked on mobile until interaction
-    attemptToPlayVideo(); 
+    if (hasInteracted || !('ontouchstart' in window)) {
+      attemptToPlayVideo(emblaApi); 
+    }
   
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, hasInteracted]);
 
   useEffect(() => {
     if (isHovering) {
@@ -206,6 +211,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       className="bg-background text-foreground"
       onMouseEnter={() => { if(!isHovering) setIsHovering(true); }}
       onMouseLeave={() => { if(isHovering) setIsHovering(false); }}
+      onTouchStart={handleUserInteraction}
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
@@ -233,10 +239,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-center items-start bg-gradient-to-t from-black/90 via-black/50 to-black/10 pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32 items-start">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full">
+            <div className="w-full pointer-events-none">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}
@@ -268,29 +274,29 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         </div>
                      </motion.div>
                 </AnimatePresence>
-
-                 <div className="flex items-center gap-4 mt-16 pointer-events-auto">
-                    <motion.button 
-                        onClick={scrollPrev} 
-                        className="p-2 text-white hover:text-primary transition-colors group"
-                        whileHover="hover"
-                    >
-                        <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                            <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
-                        </motion.div>
-                    </motion.button>
-                     <motion.button 
-                        onClick={scrollNext} 
-                        className="p-2 text-white hover:text-primary transition-colors group"
-                        whileHover="hover"
-                    >
-                        <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
-                            <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
-                        </motion.div>
-                    </motion.button>
-                </div>
             </div>
             
+            <div className="flex items-center gap-4 mt-16 pointer-events-auto">
+                <motion.button 
+                    onClick={scrollPrev} 
+                    className="p-2 text-white hover:text-primary transition-colors group"
+                    whileHover="hover"
+                >
+                    <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
+                    </motion.div>
+                </motion.button>
+                    <motion.button 
+                    onClick={scrollNext} 
+                    className="p-2 text-white hover:text-primary transition-colors group"
+                    whileHover="hover"
+                >
+                    <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
+                    </motion.div>
+                </motion.button>
+            </div>
+
           </div>
         </div>
       </div>

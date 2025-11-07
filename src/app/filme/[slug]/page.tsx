@@ -47,12 +47,11 @@ export async function generateStaticParams() {
 
 export default async function FilmPage({ params }: Props) {
   const films: Film[] = await getFilms();
-  const sortedFilms = [...films].sort((a, b) => a.slider_position - b.slider_position);
-  const currentFilm = sortedFilms.find(f => f.slug === params.slug);
+  const currentFilm = films.find(f => f.slug === params.slug);
 
   if (!currentFilm) {
     notFound();
   }
 
-  return <FilmPageClient films={sortedFilms} initialSlug={params.slug} />;
+  return <FilmPageClient films={films} initialSlug={params.slug} />;
 }

@@ -1,0 +1,78 @@
+import type { Film } from './types';
+
+export const mockFilms: Film[] = [
+  {
+    id: 1,
+    title: 'Der letzte Sommer',
+    slug: 'der-letzte-sommer',
+    subtitle: 'Ein Film von Momentum Film',
+    description: '<p>Ein intensives Coming-of-Age-Drama, das die letzten unbeschwerten Tage einer Gruppe von Freunden beleuchtet, bevor das Leben sie in unterschiedliche Richtungen treibt. Ein Film über Freundschaft, Verlust und das unvermeidliche Ende der Jugend.</p>',
+    trailer_url: 'https://videos.pexels.com/video-files/854653/854653-hd_1920_1080_30fps.mp4',
+    poster_url: 'https://picsum.photos/seed/p1/1000/1500',
+    gallery: [
+      'https://picsum.photos/seed/g11/1600/900',
+      'https://picsum.photos/seed/g12/1600/900',
+      'https://picsum.photos/seed/g13/1600/900',
+      'https://picsum.photos/seed/g14/1600/900',
+    ],
+    cast: [
+      { name: 'Max Müller', role: 'Hauptrolle' },
+      { name: 'Lisa Berger', role: 'Regie' },
+      { name: 'Jonas Schmidt', role: 'Kamera' },
+      { name: 'Sophie Klein', role: 'Drehbuch' },
+    ],
+    genre: 'Drama',
+    duration: '105 min',
+    language: 'Deutsch',
+    additional_trailer_url: 'https://vimeo.com/902839948', // Placeholder Vimeo
+    slider_position: 1,
+    is_startpage: true,
+  },
+  {
+    id: 2,
+    title: 'Echoes of Tomorrow',
+    slug: 'echoes-of-tomorrow',
+    subtitle: 'Die Zukunft ist nicht, was sie scheint',
+    description: '<p>In einer dystopischen Zukunft entdeckt eine junge Rebellin ein Geheimnis, das die Grundfesten ihrer Gesellschaft erschüttern könnte. Ein Sci-Fi-Thriller, der die Grenzen von Menschlichkeit und Technologie auslotet.</p>',
+    trailer_url: 'https://videos.pexels.com/video-files/3209828/3209828-hd_1920_1080_25fps.mp4',
+    poster_url: 'https://picsum.photos/seed/p2/1000/1500',
+    gallery: [
+      'https://picsum.photos/seed/g21/1600/900',
+      'https://picsum.photos/seed/g22/1600/900',
+      'https://picsum.photos/seed/g23/1600/900',
+    ],
+    cast: [
+      { name: 'Elena Petrova', role: 'Hauptrolle' },
+      { name: 'David Chen', role: 'Regie' },
+    ],
+    genre: 'Sci-Fi Thriller',
+    duration: '128 min',
+    language: 'Englisch',
+    additional_trailer_url: 'https://vimeo.com/902839948',
+    slider_position: 2,
+    is_startpage: false,
+  },
+  {
+    id: 3,
+    title: 'Stadt der Lichter',
+    slug: 'stadt-der-lichter',
+    subtitle: 'Eine Nacht in Paris',
+    description: '<p>Zwei Fremde treffen sich in der Stadt der Liebe und verbringen eine unvergessliche Nacht miteinander. Eine romantische Erzählung über zufällige Begegnungen und die Magie des Moments.</p>',
+    trailer_url: 'https://videos.pexels.com/video-files/853823/853823-hd_1920_1080_25fps.mp4',
+    poster_url: 'https://picsum.photos/seed/p3/1000/1500',
+    gallery: [
+      'https://picsum.photos/seed/g31/1600/900',
+      'https://picsum.photos/seed/g32/1600/900',
+    ],
+    cast: [
+      { name: 'Chloé Dubois', role: 'Hauptrolle' },
+      { name: 'Liam O\'Connell', role: 'Hauptrolle' },
+    ],
+    genre: 'Romanze',
+    duration: '92 min',
+    language: 'Französisch / Englisch',
+    additional_trailer_url: 'https://vimeo.com/902839948',
+    slider_position: 3,
+    is_startpage: false,
+  },
+];

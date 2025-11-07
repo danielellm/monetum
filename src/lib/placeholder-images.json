@@ -1,3 +1,58 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "poster-der-letzte-sommer",
+      "description": "Poster for Der letzte Sommer",
+      "imageUrl": "https://images.unsplash.com/photo-1710988486821-9af47f60d62b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxmaWxtJTIwcG9zdGVyJTIwZHJhbWF8ZW58MHx8fHwxNzYyNTE1OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "film poster drama"
+    },
+    {
+      "id": "gallery-der-letzte-sommer-1",
+      "description": "Gallery image 1 for Der letzte Sommer",
+      "imageUrl": "https://images.unsplash.com/photo-1718197031442-4ea60c901cf9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8ZHJhbWF0aWMlMjBzY2VuZXxlbnwwfHx8fDE3NjI1MTU5NDR8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "dramatic scene"
+    },
+    {
+      "id": "gallery-der-letzte-sommer-2",
+      "description": "Gallery image 2 for Der letzte Sommer",
+      "imageUrl": "https://images.unsplash.com/photo-1666381586269-31dc97c6d0f9?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxjaW5lbWF0aWMlMjBzaG90fGVufDB8fHx8MTc2MjUxMDM3NXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cinematic shot"
+    },
+    {
+      "id": "poster-echoes-of-tomorrow",
+      "description": "Poster for Echoes of Tomorrow",
+      "imageUrl": "https://images.unsplash.com/photo-1704394347181-82236077fe2f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxzY2ktZmklMjBwb3N0ZXJ8ZW58MHx8fHwxNzYyNDUyNDg4fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "sci-fi poster"
+    },
+    {
+      "id": "gallery-echoes-of-tomorrow-1",
+      "description": "Gallery image 1 for Echoes of Tomorrow",
+      "imageUrl": "https://images.unsplash.com/photo-1573767291321-c0af2eaf5266?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxmdXR1cmlzdGljJTIwY2l0eXxlbnwwfHx8fDE3NjI0Mjc2NTd8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "futuristic city"
+    },
+    {
+      "id": "gallery-echoes-of-tomorrow-2",
+      "description": "Gallery image 2 for Echoes of Tomorrow",
+      "imageUrl": "https://images.unsplash.com/photo-1690162396384-6741ab2f33bd?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8Y3lib3JnJTIwZmFjZXxlbnwwfHx8fDE3NjI0MzQwNDV8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "cyborg face"
+    },
+    {
+      "id": "poster-stadt-der-lichter",
+      "description": "Poster for Stadt der Lichter",
+      "imageUrl": "https://images.unsplash.com/photo-1601900307504-53ff2d7b6d49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxyb21hbmNlJTIwcG9zdGVyJTIwbmlnaHR8ZW58MHx8fHwxNzYyNTE1OTQ0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "romance poster night"
+    },
+    {
+      "id": "gallery-stadt-der-lichter-1",
+      "description": "Gallery image 1 for Stadt der Lichter",
+      "imageUrl": "https://images.unsplash.com/photo-1694618564673-f9f0d47c47e4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxjb3VwbGUlMjBjaXR5fGVufDB8fHx8MTc2MjUxNTk0NHww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "couple city"
+    },
+    {
+      "id": "gallery-stadt-der-lichter-2",
+      "description": "Gallery image 2 for Stadt der Lichter",
+      "imageUrl": "https://images.unsplash.com/photo-1570097703229-b195d6dd291f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxlaWZmZWwlMjB0b3dlcnxlbnwwfHx8fDE3NjI0NjQ0ODh8MA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "eiffel tower"
+    }
+  ]
 }

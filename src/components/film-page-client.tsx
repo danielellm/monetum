@@ -22,20 +22,25 @@ const AUTOPLAY_DURATION = 12000; // 12 seconds
 export default function FilmPageClient({ films: unsortedFilms, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
   
-  // Ensure films are always sorted by slider_position
+  // 1. Sort films immediately
   const films = useMemo(() => 
-    [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position), 
+    [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position),
     [unsortedFilms]
   );
 
-  const initialSlideIndex = useMemo(() => films.findIndex((f) => f.slug === initialSlug), [films, initialSlug]);
+  // 2. Find the correct initial index from the *sorted* list
+  const initialSlideIndex = useMemo(() => 
+    films.findIndex((f) => f.slug === initialSlug), 
+    [films, initialSlug]
+  );
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    startIndex: initialSlideIndex,
+    // 3. Ensure the startIndex is valid before passing it
+    startIndex: initialSlideIndex >= 0 ? initialSlideIndex : 0,
   });
   
-  const [activeIndex, setActiveIndex] = useState(initialSlideIndex);
+  const [activeIndex, setActiveIndex] = useState(initialSlideIndex >= 0 ? initialSlideIndex : 0);
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   
@@ -49,22 +54,29 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       autoplayTimer.current = null;
     }
   }, []);
-  
+
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    setProgress(0); // Reset progress before starting
+    setProgress(0);
     const timer = setInterval(() => {
-      setProgress(prev => {
-        if (prev >= 100) {
-          emblaApi?.scrollNext();
-          return 0;
-        }
-        return prev + 100 / (AUTOPLAY_DURATION / 100);
-      });
+        setProgress(prev => {
+            if (prev >= 100) {
+                // Let the 'select' event handle the logic
+                return 100;
+            }
+            return prev + (100 / (AUTOPLAY_DURATION / 100));
+        });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer, emblaApi]);
+  }, [clearAutoplayTimer]);
 
+  // Effect to advance slide when progress reaches 100
+  useEffect(() => {
+      if (progress >= 100) {
+          emblaApi?.scrollNext();
+      }
+  }, [progress, emblaApi]);
+  
   const onInteraction = useCallback(() => {
     clearAutoplayTimer();
     setProgress(0);
@@ -74,40 +86,51 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
-    onInteraction();
-  }, [emblaApi, onInteraction]);
+  }, [emblaApi]);
   
   const scrollNext = useCallback(() => {
     emblaApi?.scrollNext();
-    onInteraction();
-  }, [emblaApi, onInteraction]);
+  }, [emblaApi]);
   
   useEffect(() => {
     if (!emblaApi) return;
-  
-    const handleSelect = () => {
-      if (!emblaApi) return;
+
+    const onSelect = () => {
       setActiveIndex(emblaApi.selectedScrollSnap());
-      setProgress(0);
+      setProgress(0); // Reset progress on any interaction
+      if (!isHovering) {
+        onInteraction();
+      }
+    };
+    
+    const onPointerDown = () => {
       onInteraction();
     };
-  
-    emblaApi.on('select', handleSelect);
-    emblaApi.on('pointerDown', onInteraction);
-  
+
+    emblaApi.on('select', onSelect);
+    emblaApi.on('pointerDown', onPointerDown);
+
+    // Initial start
     if (!isHovering) {
-      startAutoplay();
-    } else {
-      clearAutoplayTimer();
-      setProgress(0);
+        startAutoplay();
     }
   
     return () => {
-      emblaApi.off('select', handleSelect);
-      emblaApi.off('pointerDown', onInteraction);
+      emblaApi.off('select', onSelect);
+      emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
   }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction]);
+
+  // Handle hover state
+  useEffect(() => {
+    if (isHovering) {
+        clearAutoplayTimer();
+        setProgress(0);
+    } else {
+        startAutoplay();
+    }
+  }, [isHovering, clearAutoplayTimer, startAutoplay]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;

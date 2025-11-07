@@ -32,80 +32,75 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [isInteracting, setIsInteracting] = useState(false);
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-
+  
   const activeFilm = films[activeIndex];
 
-  const clearAutoplayTimer = useCallback(() => {
-    if (timer) {
-      clearInterval(timer);
-      setTimer(null);
-    }
-    setProgress(0);
-  }, [timer]);
+  const scrollPrev = useCallback(() => {
+    emblaApi?.scrollPrev();
+  }, [emblaApi]);
+  
+  const scrollNext = useCallback(() => {
+    emblaApi?.scrollNext();
+  }, [emblaApi]);
 
-  const startAutoplay = useCallback(() => {
-    clearAutoplayTimer();
-    const newTimer = setInterval(() => {
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setActiveIndex(emblaApi.selectedScrollSnap());
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (!emblaApi) return;
+
+    const onPointerDown = () => {
+        setIsInteracting(true);
+    };
+
+    const onSettle = () => {
+        setIsInteracting(false);
+    };
+
+    emblaApi.on('select', onSelect);
+    emblaApi.on('pointerDown', onPointerDown);
+    emblaApi.on('settle', onSettle);
+
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('pointerDown', onPointerDown);
+      emblaApi.off('settle', onSettle);
+    };
+  }, [emblaApi, onSelect]);
+
+  useEffect(() => {
+    if (isHovering || isInteracting) {
+        setProgress(0);
+        return;
+    }
+
+    const interval = setInterval(() => {
       setProgress(p => {
         if (p >= 100) {
-          emblaApi?.scrollNext();
+          scrollNext();
           return 0;
         }
         return p + (100 / (AUTOPLAY_DURATION / 100));
       });
     }, 100);
-    setTimer(newTimer);
-  }, [emblaApi, clearAutoplayTimer]);
 
-  const onSelect = useCallback(() => {
-    if (!emblaApi) return;
-    setActiveIndex(emblaApi.selectedScrollSnap());
-    if (!isHovering && !isInteracting) {
-      startAutoplay();
-    } else {
-      clearAutoplayTimer();
-    }
-  }, [emblaApi, isHovering, isInteracting, startAutoplay, clearAutoplayTimer]);
+    return () => clearInterval(interval);
 
-  const scrollPrev = useCallback(() => {
-    emblaApi?.scrollPrev();
-    setIsInteracting(true);
-    clearAutoplayTimer();
-  }, [emblaApi, clearAutoplayTimer]);
-  
-  const scrollNext = useCallback(() => {
-    emblaApi?.scrollNext();
-    setIsInteracting(true);
-    clearAutoplayTimer();
-  }, [emblaApi, clearAutoplayTimer]);
-
-  useEffect(() => {
-    if (!emblaApi) return;
-
-    emblaApi.on('select', onSelect);
-    emblaApi.on('pointerDown', () => {
-      setIsInteracting(true);
-      clearAutoplayTimer();
-    });
-    emblaApi.on('settle', () => {
-      setIsInteracting(false);
-      if (!isHovering) {
-        startAutoplay();
-      }
-    });
-
-    return () => {
-      emblaApi.off('select', onSelect);
-      clearAutoplayTimer();
-    };
-  }, [emblaApi, onSelect, isHovering, startAutoplay, clearAutoplayTimer]);
+  }, [isHovering, isInteracting, scrollNext]);
 
   useEffect(() => {
     if (initialSlideIndex !== -1 && emblaApi) {
       emblaApi.scrollTo(initialSlideIndex, true);
     }
   }, [initialSlideIndex, emblaApi]);
+
+  useEffect(() => {
+    if (isInteracting) {
+        setProgress(0);
+    }
+  }, [isInteracting]);
 
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -118,18 +113,8 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
         router.prefetch(`/filme/${films[nextIndex].slug}`);
         router.prefetch(`/filme/${films[prevIndex].slug}`);
     }
-  }, [activeIndex, films, router, emblaApi]);
+  }, [activeIndex, films, router, emblaApi, isInteracting]);
 
-  useEffect(() => {
-    if (!isHovering && !isInteracting) {
-      startAutoplay();
-    } else {
-      clearAutoplayTimer();
-    }
-    
-    return () => clearAutoplayTimer();
-  }, [isHovering, isInteracting, startAutoplay, clearAutoplayTimer]);
-  
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight') scrollNext();
@@ -183,9 +168,9 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0, transition: { delay: 0.2, duration: 0.8 } }}
                 exit={{ opacity: 0 }}
-                className='pointer-events-auto self-start mb-6'>
-                <span className="text-2xl md:text-3xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
-                <span className="text-base md:text-lg text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+                className='pointer-events-auto self-start mb-6 md:mb-8'>
+                <span className="text-xl md:text-2xl font-normal text-primary">{String(activeIndex + 1).padStart(2, '0')}</span>
+                <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
               </motion.div>
             </AnimatePresence>
 
@@ -201,9 +186,9 @@ export default function FilmPageClient({ films, initialSlug }: FilmPageClientPro
                     <div className="flex flex-col items-start text-left max-w-none">
                         <h1 className="text-7xl md:text-8xl lg:text-9xl font-bold font-headline leading-none break-words">{activeFilm.title}</h1>
                         <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                            <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
-                            <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
-                            <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
+                           <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
+                           <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
+                           <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
                         </div>
                         <div className="mt-8 flex items-center gap-4">
                             <motion.button 

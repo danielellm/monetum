@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MoveHorizontal } from 'lucide-react';
 
 import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
@@ -41,6 +41,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const isTouchDevice = useRef(false);
   
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
 
@@ -52,40 +54,20 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     slides.forEach((slide, index) => {
         const video = slide?.querySelector('video');
         if (video) {
-            if (index === api.selectedScrollSnap()) {
-                video.play().catch(err => {
-                  // Autoplay was prevented. This is expected on mobile.
-                  // The user will need to interact to start the video.
-                });
-            } else {
+            const isSlideActive = index === api.selectedScrollSnap();
+            if (isSlideActive && video.paused) {
+                // We only try to play if the user has interacted or it's not a touch device
+                if(hasInteracted || !isTouchDevice.current) {
+                  video.play().catch(err => {
+                    console.log("Autoplay was prevented. Awaiting user interaction.");
+                  });
+                }
+            } else if (!isSlideActive && !video.paused) {
                 video.pause();
             }
         }
     });
-  }, [emblaApi]);
-  
-  const handleUserInteraction = useCallback(() => {
-    if (!hasInteracted) {
-      setHasInteracted(true);
-      // Attempt to play all videos now that we have user interaction
-      document.querySelectorAll('video').forEach(vid => {
-        vid.play().catch(err => console.log('Play after interaction failed.'));
-      });
-      attemptToPlayVideo(); 
-    }
-  }, [hasInteracted, attemptToPlayVideo]);
-
-  // Listen for the first user interaction
-  useEffect(() => {
-    if (hasInteracted) return;
-    
-    const events: (keyof WindowEventMap)[] = ['scroll', 'click', 'touchstart', 'keydown'];
-    events.forEach(event => window.addEventListener(event, handleUserInteraction, { once: true }));
-
-    return () => {
-      events.forEach(event => window.removeEventListener(event, handleUserInteraction));
-    };
-  }, [hasInteracted, handleUserInteraction]);
+  }, [emblaApi, hasInteracted]);
 
   const clearAutoplayTimer = useCallback(() => {
     if (autoplayTimer.current) {
@@ -96,8 +78,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    // No autoplay on touch devices or if hovering
-    if (isHovering || 'ontouchstart' in window) return;
+    if (isHovering) return;
+
+    // On mobile, only start autoplay after user has interacted
+    if (isTouchDevice.current && !hasInteracted) return;
 
     setProgress(0);
     const timer = setInterval(() => {
@@ -109,8 +93,29 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer, isHovering]);
+  }, [clearAutoplayTimer, isHovering, hasInteracted]);
 
+  const handleUserInteraction = useCallback(() => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+      // Attempt to play the current video now that we have user interaction
+      attemptToPlayVideo();
+      // Start autoplay if it wasn't running
+      startAutoplay();
+    }
+  }, [hasInteracted, attemptToPlayVideo, startAutoplay]);
+
+
+  // Check for touch device on mount
+  useEffect(() => {
+    isTouchDevice.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice.current) {
+      setShowSwipeHint(true);
+      const timer = setTimeout(() => setShowSwipeHint(false), 4000); // Show hint for 4 seconds
+      return () => clearTimeout(timer);
+    }
+  }, []);
+  
   useEffect(() => {
       if (progress >= 100) {
           emblaApi?.scrollNext();
@@ -119,13 +124,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const onInteraction = useCallback(() => {
     if (!emblaApi) return;
-    handleUserInteraction();
+    if (!hasInteracted) {
+      handleUserInteraction();
+    }
     
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction]);
+  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -144,11 +151,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       const newIndex = emblaApi.selectedScrollSnap();
       setActiveIndex(newIndex);
       setProgress(0);
+      attemptToPlayVideo(emblaApi);
       if (!isHovering) {
         startAutoplay();
-      }
-      if (hasInteracted || !('ontouchstart' in window)) {
-        attemptToPlayVideo(emblaApi);
       }
     };
     
@@ -158,18 +163,20 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
-
-    startAutoplay();
-    if (hasInteracted || !('ontouchstart' in window)) {
-      attemptToPlayVideo(emblaApi); 
+    
+    // Autoplay logic for desktop
+    if (!isTouchDevice.current) {
+        startAutoplay();
     }
+
+    attemptToPlayVideo(emblaApi); 
   
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, hasInteracted]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo]);
 
   useEffect(() => {
     if (isHovering) {
@@ -178,7 +185,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     } else {
         startAutoplay();
     }
-  }, [isHovering, clearAutoplayTimer, startAutoplay]);
+  }, [isHovering, startAutoplay, clearAutoplayTimer]);
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -211,12 +218,12 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       className="bg-background text-foreground"
       onMouseEnter={() => { if(!isHovering) setIsHovering(true); }}
       onMouseLeave={() => { if(isHovering) setIsHovering(false); }}
-      onTouchStart={handleUserInteraction}
+      onClick={handleUserInteraction}
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
-            {!isHovering && progress > 0 && <motion.div
+            {progress > 0 && <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
@@ -239,7 +246,24 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+        <AnimatePresence>
+            {showSwipeHint && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: [0, 1, 1, 0] }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 4, times: [0, 0.1, 0.9, 1] }}
+                    className="absolute z-20 inset-0 flex items-center justify-center pointer-events-none"
+                >
+                    <div className="flex items-center gap-2 bg-black/50 text-white p-3 rounded-lg">
+                        <MoveHorizontal className="w-6 h-6"/>
+                        <span>Swipe to navigate</span>
+                    </div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+
+        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black/95 via-black/80 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
             <div className="w-full pointer-events-none">

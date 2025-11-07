@@ -27,17 +27,17 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     [unsortedFilms]
   );
 
-  const initialSlideIndex = useMemo(() => 
-    films.findIndex((f) => f.slug === initialSlug),
-    [films, initialSlug]
-  );
+  const initialSlideIndex = useMemo(() => {
+    const index = films.findIndex((f) => f.slug === initialSlug);
+    return index >= 0 ? index : 0;
+  }, [films, initialSlug]);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
-    startIndex: initialSlideIndex >= 0 ? initialSlideIndex : 0,
+    startIndex: initialSlideIndex,
   });
   
-  const [activeIndex, setActiveIndex] = useState(initialSlideIndex >= 0 ? initialSlideIndex : 0);
+  const [activeIndex, setActiveIndex] = useState(initialSlideIndex);
   const [progress, setProgress] = useState(0);
   const [isHovering, setIsHovering] = useState(false);
   
@@ -185,10 +185,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
         
-        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-black/20">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end items-start">
+        <div className="absolute inset-0 z-10 flex flex-col items-center pointer-events-none bg-gradient-to-t from-black via-black/80 to-transparent">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-center items-start">
             
-            <div className="w-full pb-[15vh]">
+            <div className="w-full">
                 <AnimatePresence>
                   <motion.div
                     key={`counter-${activeFilm.id}`}
@@ -221,7 +221,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                      </motion.div>
                 </AnimatePresence>
 
-                 <div className="flex items-center gap-4 mt-12">
+                 <div className="flex items-center gap-4 mt-32">
                     <motion.button 
                         onClick={scrollPrev} 
                         className="pointer-events-auto p-2 text-white hover:text-primary transition-colors group"

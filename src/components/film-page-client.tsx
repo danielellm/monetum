@@ -11,6 +11,7 @@ import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
 import Footer from './footer';
 import Header from './header';
+import Gallery from './gallery';
 
 type FilmPageClientProps = {
   films: Film[];
@@ -368,6 +369,30 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
       </div>
+      
+      <AnimatePresence mode="wait">
+        <motion.div
+            key={`${activeFilm.id}-gallery`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+        >
+            {activeFilm.gallery && activeFilm.gallery.length > 0 && (
+                <div className="w-full mt-16 md:mt-24">
+                     <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.3 }}
+                        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+                    >
+                        <Gallery images={activeFilm.gallery} />
+                    </motion.div>
+                </div>
+            )}
+        </motion.div>
+      </AnimatePresence>
+
 
       <AnimatePresence mode="wait">
         <motion.div

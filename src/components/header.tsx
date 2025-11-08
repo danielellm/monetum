@@ -59,9 +59,9 @@ export default function Header({ films }: HeaderProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 {films.map((film) => (
-                  <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>
-                    <DropdownMenuItem asChild>
-                      <a>{film.title}</a>
+                  <Link key={film.id} href={`/filme/${film.slug}`} passHref>
+                    <DropdownMenuItem>
+                      {film.title}
                     </DropdownMenuItem>
                   </Link>
                 ))}
@@ -102,7 +102,7 @@ export default function Header({ films }: HeaderProps) {
               <X className="h-8 w-8" />
             </button>
 
-            <nav className="flex flex-col items-center gap-8">
+            <nav className="flex flex-col items-center gap-8 text-center">
                  <motion.div
                     custom={0}
                     variants={linkVariants}
@@ -110,27 +110,25 @@ export default function Header({ films }: HeaderProps) {
                     animate="visible"
                     className="text-3xl font-headline text-white"
                 >
-                    <p className="mb-4 text-center">Movies</p>
+                    <p className="mb-4">Movies</p>
                     <div className="flex flex-col items-center gap-4">
                         {films.map((film, i) => (
-                           <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>
-                                <a onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary transition-colors">
-                                    {film.title}
-                                </a>
+                           <Link key={film.id} href={`/filme/${film.slug}`} onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary transition-colors">
+                               {film.title}
                            </Link>
                         ))}
                     </div>
                 </motion.div>
 
                 {navLinks.map((link, i) => (
-                    <motion.a 
-                        key={link.label} 
+                    <motion.a
+                        key={link.label}
                         href={link.href}
                         custom={i + 1}
                         variants={linkVariants}
                         initial="hidden"
                         animate="visible"
-                        onClick={() => setIsMenuOpen(false)} 
+                        onClick={() => setIsMenuOpen(false)}
                         className="text-3xl font-headline text-white hover:text-primary transition-colors">
                         {link.label}
                     </motion.a>

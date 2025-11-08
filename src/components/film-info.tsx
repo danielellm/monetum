@@ -36,12 +36,14 @@ export default function FilmInfo({ film }: { film: Film }) {
         </FadeInWhenVisible>
         
         <FadeInWhenVisible>
-            <div className="mt-12 text-sm text-right text-gray-400 font-mono">
+            <div className="mt-12 text-sm text-right font-mono">
               <p>
                 {film.cast.map((person, index) => (
                   <React.Fragment key={person.name}>
-                    <span><strong>{person.role}:</strong> {person.name}</span>
-                    {index < film.cast.length - 1 && <span className="mx-2">/</span>}
+                    <span>
+                      <span className="text-muted-foreground">{person.role}:</span> <span className="text-foreground">{person.name}</span>
+                    </span>
+                    {index < film.cast.length - 1 && <span className="mx-2 text-muted-foreground">/</span>}
                   </React.Fragment>
                 ))}
               </p>

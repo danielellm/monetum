@@ -417,14 +417,13 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             transition={{ duration: 0.7 }}
         >
             {activeFilm.additional_trailer_url && (
-                <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
+                <div className="max-w-screen-2xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.3 }}
                         variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
                     >
-                        <h3 className="text-3xl font-headline text-primary mb-8 text-center">Trailer</h3>
                         <TrailerEmbed url={activeFilm.additional_trailer_url} />
                     </motion.div>
                 </div>

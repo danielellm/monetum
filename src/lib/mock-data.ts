@@ -28,7 +28,7 @@ export const mockFilms: Film[] = [
     genre: 'Drama',
     duration: '105 min',
     language: 'Deutsch',
-    additional_trailer_url: 'https://vimeo.com/902839948', // Placeholder Vimeo
+    additional_trailer_url: 'https://www.youtube.com/watch?v=uI-67hwsSks',
     slider_position: 1,
     is_startpage: true,
   },

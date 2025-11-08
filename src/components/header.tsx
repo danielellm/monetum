@@ -92,7 +92,7 @@ export default function Header({ films }: HeaderProps) {
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center"
+            className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center overflow-y-auto py-16"
           >
             <button
               onClick={() => setIsMenuOpen(false)}
@@ -108,13 +108,13 @@ export default function Header({ films }: HeaderProps) {
                     variants={linkVariants}
                     initial="hidden"
                     animate="visible"
-                    className="text-3xl font-headline text-white hover:text-primary transition-colors"
+                    className="text-3xl font-headline text-white"
                 >
                     <p className="mb-4 text-center">Movies</p>
                     <div className="flex flex-col items-center gap-4">
                         {films.map((film, i) => (
                            <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>
-                                <a onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary">
+                                <a onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary transition-colors">
                                     {film.title}
                                 </a>
                            </Link>

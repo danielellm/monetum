@@ -20,29 +20,38 @@ type FilmPageClientProps = {
 const AUTOPLAY_DURATION = 12000; // 12 seconds
 
 const containerVariants = {
-  hidden: { opacity: 0 },
+  hidden: { opacity: 1 }, // Keep container visible
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.2,
+      delayChildren: 0.3, // Delay before any children animations start
+      staggerChildren: 0.2, // Stagger the animation of children (title, then details)
     },
   },
   exit: {
-    opacity: 0,
+    opacity: 1, // Keep container visible
     transition: {
-        duration: 0.3
-    }
-  }
+      duration: 0.3,
+    },
+  },
 };
 
 const titleVariants = {
   hidden: { opacity: 0, x: -30 },
-  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
+  },
 };
 
 const detailsVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { duration: 0.5 } },
+  hidden: { opacity: 0, x: -30 },
+  visible: { 
+    opacity: 1, 
+    x: 0, 
+    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
+  },
 };
 
 
@@ -159,8 +168,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       }
   }, [progress, emblaApi]);
   
-  const onInteraction = useCallback(() => {
-    if (!emblaApi) return;
+  const onInteraction = useCallback((api) => {
+    if (!api) return;
     if (!hasInteracted) {
       handleUserInteraction();
     }
@@ -169,17 +178,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [emblaApi, clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
+  }, [clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
-    onInteraction();
-  }, [emblaApi, onInteraction]);
+  }, [emblaApi]);
   
   const scrollNext = useCallback(() => {
     emblaApi?.scrollNext();
-    onInteraction();
-  }, [emblaApi, onInteraction]);
+  }, [emblaApi]);
   
   useEffect(() => {
     if (!emblaApi) return;
@@ -195,7 +202,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     };
     
     const onPointerDown = () => {
-      onInteraction();
+      onInteraction(emblaApi);
     };
 
     emblaApi.on('select', onSelect);
@@ -213,7 +220,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo]);
+  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, hasInteracted]);
 
   useEffect(() => {
     if (isHovering) {
@@ -257,7 +264,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       className="bg-background text-foreground"
       onMouseEnter={() => { if(!isTouchDevice.current && !isHovering) setIsHovering(true); }}
       onMouseLeave={() => { if(!isTouchDevice.current && isHovering) setIsHovering(false); }}
-      onClick={handleUserInteraction} // Use main element for interaction detection
+      onTouchStart={handleUserInteraction}
     >
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
@@ -292,7 +299,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     animate={{ opacity: [0, 0.7, 0.7, 0] }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 2.2, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-30 top-24 left-1/2 -translate-x-1/2 flex items-center justify-center pointer-events-none"
+                    className="absolute z-30 top-24 left-0 right-0 flex items-center justify-center pointer-events-none"
                 >
                     <div className="flex items-center gap-2 bg-black/20 text-white p-2 px-4 rounded-lg backdrop-blur-sm">
                         <MoveHorizontal className="w-5 h-5"/>
@@ -302,10 +309,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             )}
         </AnimatePresence>
 
-        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+        <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="w-full pointer-events-auto">
                 <div className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
@@ -318,11 +325,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         initial="hidden"
                         animate="visible"
                         exit="exit"
-                        className="w-full pointer-events-none"
+                        className="w-full"
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</motion.h1>
-                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words pointer-events-none">{activeFilm.title}</motion.h1>
+                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider pointer-events-none">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                                <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
                                <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>

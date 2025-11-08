@@ -406,6 +406,19 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             )}
         </motion.div>
       </AnimatePresence>
+      
+       {activeFilm.additional_trailer_url && (
+         <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
+            <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.1 }}
+                variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+            >
+                <TrailerEmbed url={activeFilm.additional_trailer_url} />
+            </motion.div>
+         </div>
+       )}
 
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
         <div className="w-full flex justify-between items-center gap-8">
@@ -444,8 +457,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
         <div className="w-full flex flex-col items-end gap-8">
-            <div className="text-right flex flex-col sm:flex-row sm:gap-12">
-                <div className="mb-6 sm:mb-0">
+            <div className="text-right flex flex-col gap-8">
+                <div>
                     <h3 className="text-sm text-muted-foreground">say hello</h3>
                     <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
                 </div>

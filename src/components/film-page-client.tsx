@@ -12,7 +12,6 @@ import FilmInfo from './film-info';
 import Footer from './footer';
 import Header from './header';
 import Gallery from './gallery';
-import TrailerEmbed from './trailer-embed';
 
 type FilmPageClientProps = {
   films: Film[];
@@ -161,11 +160,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     
     clearAutoplayTimer();
     setProgress(0);
-    if (!isTouchDevice.current) { // No restart on hover on desktop
-        const restartTimer = setTimeout(startAutoplay, 5000); 
-        return () => clearTimeout(restartTimer);
-    }
-  }, [clearAutoplayTimer, startAutoplay, handleUserInteraction]);
+    // No restart on hover on desktop
+  }, [clearAutoplayTimer, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -394,11 +390,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             transition={{ duration: 0.7 }}
         >
             {activeFilm.gallery && activeFilm.gallery.length > 0 && (
-                <div className="w-full mt-16 md:mt-24">
+                <div className="w-full">
                      <motion.div
                         initial="hidden"
                         whileInView="visible"
-                        viewport={{ once: true, amount: 0.3 }}
+                        viewport={{ once: true, amount: 0.1 }}
                         variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
                     >
                         <Gallery images={activeFilm.gallery} />
@@ -408,35 +404,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         </motion.div>
       </AnimatePresence>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-            key={`${activeFilm.id}-trailer`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-        >
-            {activeFilm.additional_trailer_url && (
-                <div className="max-w-screen-2xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
-                    <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.3 }}
-                        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-                    >
-                        <TrailerEmbed url={activeFilm.additional_trailer_url} />
-                    </motion.div>
-                </div>
-            )}
-        </motion.div>
-      </AnimatePresence>
-
-
       <Footer />
     </main>
   );
 }
- 
-    
-
-    

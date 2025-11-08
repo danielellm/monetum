@@ -28,10 +28,10 @@ export default function FilmInfo({ film }: { film: Film }) {
   return (
     <div className="bg-background py-16 md:py-24 px-4 md:px-6">
       <div className="max-w-screen-2xl mx-auto">
-        <div className="max-w-4xl">
+        <div className="w-full">
             <FadeInWhenVisible>
                 <div
-                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
+                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left max-w-4xl"
                     dangerouslySetInnerHTML={{ __html: film.description }}
                 />
             </FadeInWhenVisible>

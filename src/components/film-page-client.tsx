@@ -160,7 +160,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     
     clearAutoplayTimer();
     setProgress(0);
-    // No restart on hover on desktop
   }, [clearAutoplayTimer, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
@@ -190,6 +189,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('pointerDown', onPointerDown);
     
     if (!isTouchDevice.current) {
+        emblaApi.on('pointerMove', onInteraction);
         startAutoplay();
     }
 
@@ -198,6 +198,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('pointerDown', onPointerDown);
+      emblaApi.off('pointerMove', onInteraction);
       clearAutoplayTimer();
     };
   }, [emblaApi, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, isHeroVisible]);
@@ -390,7 +391,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             transition={{ duration: 0.7 }}
         >
             {activeFilm.gallery && activeFilm.gallery.length > 0 && (
-                <div className="w-full">
+                <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
                      <motion.div
                         initial="hidden"
                         whileInView="visible"

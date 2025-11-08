@@ -39,13 +39,16 @@ export default function FilmInfo({ film }: { film: Film }) {
             </FadeInWhenVisible>
             
             <FadeInWhenVisible>
-                <div className="text-sm font-mono space-y-2">
-                  {film.cast.map((person) => (
-                    <div key={person.name} className="flex items-center justify-end">
-                        <span className="text-muted-foreground shrink-0">{person.role}</span>
-                        <span className="text-muted-foreground mx-2">/</span>
-                        <span className="text-foreground whitespace-nowrap">{person.name}</span>
-                    </div>
+                <div className="text-sm font-mono text-right flex flex-wrap justify-end">
+                  {film.cast.map((person, index) => (
+                    <React.Fragment key={person.name}>
+                      <span className="inline-flex">
+                          <span className="text-muted-foreground shrink-0">{person.role}</span>
+                          <span className="text-muted-foreground mx-2">/</span>
+                          <span className="text-foreground whitespace-nowrap">{person.name}</span>
+                      </span>
+                      {index < film.cast.length - 1 && <span className="text-muted-foreground mx-2">/</span>}
+                    </React.Fragment>
                   ))}
                 </div>
             </FadeInWhenVisible>

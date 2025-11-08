@@ -273,7 +273,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       className="bg-background text-foreground"
       onTouchStart={handleUserInteraction}
     >
-      <Header />
+      <Header films={films} />
       <div className="relative h-screen w-full overflow-hidden" ref={heroRef}>
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
             {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <motion.div

@@ -1,10 +1,22 @@
 'use client';
 
 import { useState } from 'react';
-import { Film, Menu, X } from 'lucide-react';
+import { Film, Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import type { Film as FilmType } from '@/lib/types';
+import Link from 'next/link';
 
-export default function Header() {
+type HeaderProps = {
+  films: FilmType[];
+};
+
+export default function Header({ films }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
@@ -41,6 +53,21 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1 hover:text-primary transition-colors outline-none">
+                Movies <ChevronDown className="h-4 w-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {films.map((film) => (
+                  <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>
+                    <DropdownMenuItem asChild>
+                      <a>{film.title}</a>
+                    </DropdownMenuItem>
+                  </Link>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {navLinks.map((link) => (
               <a key={link.label} href={link.href} className="hover:text-primary transition-colors">
                 {link.label}
@@ -76,11 +103,30 @@ export default function Header() {
             </button>
 
             <nav className="flex flex-col items-center gap-8">
+                 <motion.div
+                    custom={0}
+                    variants={linkVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="text-3xl font-headline text-white hover:text-primary transition-colors"
+                >
+                    <p className="mb-4">Movies</p>
+                    <div className="flex flex-col items-center gap-4">
+                        {films.map((film, i) => (
+                           <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>
+                                <a onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary">
+                                    {film.title}
+                                </a>
+                           </Link>
+                        ))}
+                    </div>
+                </motion.div>
+
                 {navLinks.map((link, i) => (
                     <motion.a 
                         key={link.label} 
                         href={link.href}
-                        custom={i}
+                        custom={i + 1}
                         variants={linkVariants}
                         initial="hidden"
                         animate="visible"

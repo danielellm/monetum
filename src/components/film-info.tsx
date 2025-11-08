@@ -10,8 +10,8 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.3,
-      ease: [0.6, 0.01, 0.05, 0.95], // Corrected value
+      staggerChildren: 0.35,
+      ease: [0.6, 0.01, 0.05, 0.95],
       duration: 0.8,
     },
   },
@@ -23,8 +23,8 @@ const itemVariants = {
     opacity: 1,
     y: 0,
     transition: {
-      ease: [0.6, 0.01, 0.05, 0.95], // Corrected value
-      duration: 0.8,
+      ease: [0.6, 0.01, 0.05, 0.95],
+      duration: 1.2,
     },
   },
 };
@@ -37,7 +37,7 @@ export default function FilmInfo({ film }: { film: Film }) {
         variants={containerVariants}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, amount: 0.1 }}
+        viewport={{ once: true, amount: 0.2 }}
     >
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 items-start">

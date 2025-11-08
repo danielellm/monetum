@@ -369,6 +369,18 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           </div>
         </div>
       </div>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+            key={activeFilm.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+        >
+            <FilmInfo film={activeFilm} />
+        </motion.div>
+      </AnimatePresence>
       
       <AnimatePresence mode="wait">
         <motion.div
@@ -393,18 +405,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         </motion.div>
       </AnimatePresence>
 
-
-      <AnimatePresence mode="wait">
-        <motion.div
-            key={activeFilm.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-        >
-            <FilmInfo film={activeFilm} />
-        </motion.div>
-      </AnimatePresence>
 
       <Footer />
     </main>

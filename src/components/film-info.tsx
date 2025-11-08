@@ -1,7 +1,6 @@
 'use client';
 
 import { Film } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import Gallery from './gallery';
 import TrailerEmbed from './trailer-embed';
 import { motion } from 'framer-motion';
@@ -27,44 +26,21 @@ function FadeInWhenVisible({ children }: { children: React.ReactNode }) {
 export default function FilmInfo({ film }: { film: Film }) {
   return (
     <div className="bg-background py-16 md:py-24 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12">
-        {/* Left Column: Description */}
-        <div className="md:col-span-2">
-            <FadeInWhenVisible>
-                <div
-                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg"
-                    dangerouslySetInnerHTML={{ __html: film.description }}
-                />
-            </FadeInWhenVisible>
-        </div>
-
-        {/* Right Column: Meta */}
-        <div className="space-y-8">
-            <FadeInWhenVisible>
-                <Card className="bg-transparent border-secondary">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-primary">Details</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm space-y-2 font-mono">
-                        <p><strong>Genre:</strong> {film.genre}</p>
-                        <p><strong>Dauer:</strong> {film.duration}</p>
-                        <p><strong>Sprache:</strong> {film.language}</p>
-                    </CardContent>
-                </Card>
-            </FadeInWhenVisible>
-            <FadeInWhenVisible>
-                <Card className="bg-transparent border-secondary">
-                    <CardHeader>
-                        <CardTitle className="font-headline text-primary">Cast & Crew</CardTitle>
-                    </CardHeader>
-                    <CardContent className="text-sm space-y-2 font-mono">
-                        {film.cast.map((person) => (
-                            <p key={person.name}><strong>{person.role}:</strong> {person.name}</p>
-                        ))}
-                    </CardContent>
-                </Card>
-            </FadeInWhenVisible>
-        </div>
+      <div className="max-w-4xl mx-auto">
+        <FadeInWhenVisible>
+            <div
+                className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
+                dangerouslySetInnerHTML={{ __html: film.description }}
+            />
+        </FadeInWhenVisible>
+        
+        <FadeInWhenVisible>
+            <div className="mt-12 text-sm text-right text-gray-400 font-mono space-y-2">
+                {film.cast.map((person) => (
+                    <p key={person.name}><strong>{person.role}:</strong> {person.name}</p>
+                ))}
+            </div>
+        </FadeInWhenVisible>
       </div>
 
       {film.gallery && film.gallery.length > 0 && (

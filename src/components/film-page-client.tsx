@@ -443,7 +443,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
       <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
         <div className="w-full flex flex-col items-end gap-y-12">
-            <div className="text-right flex flex-col gap-8">
+            <div className="text-right flex flex-col items-end gap-8">
                 <div>
                     <h3 className="text-sm text-primary">say hello</h3>
                     <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>

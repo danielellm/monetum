@@ -20,19 +20,15 @@ type FilmPageClientProps = {
 const AUTOPLAY_DURATION = 12000; // 12 seconds
 
 const containerVariants = {
-  hidden: { opacity: 1 }, // Keep container visible
+  hidden: { opacity: 1 },
   visible: {
     opacity: 1,
     transition: {
-      delayChildren: 0.3, // Delay before any children animations start
-      staggerChildren: 0.2, // Stagger the animation of children (title, then details)
+      staggerChildren: 0.2,
     },
   },
   exit: {
-    opacity: 1, // Keep container visible
-    transition: {
-      duration: 0.3,
-    },
+    opacity: 1,
   },
 };
 
@@ -41,7 +37,7 @@ const titleVariants = {
   visible: { 
     opacity: 1, 
     x: 0, 
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
+    transition: { delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
   },
 };
 
@@ -50,7 +46,7 @@ const detailsVariants = {
   visible: { 
     opacity: 1, 
     x: 0, 
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
+    transition: { delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
   },
 };
 
@@ -96,8 +92,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             if (isSlideActive) {
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
-                        // Autoplay was prevented. This is expected on mobile before interaction.
-                        // We'll rely on the user interaction handler to trigger play.
                         console.log("Autoplay was prevented by browser.");
                     });
                 }
@@ -136,9 +130,6 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
  const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
         setHasInteracted(true);
-        
-        // This is the key for mobile autoplay.
-        // Once the user interacts, we try to play the current video.
         if (emblaApi) {
             const slides = emblaApi.slideNodes();
             const currentSlide = slides[emblaApi.selectedScrollSnap()];
@@ -147,18 +138,20 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 video.play().catch(e => console.log("Still couldn't play after interaction."));
             }
         }
-        startAutoplay(); // And start the timer logic.
+        startAutoplay();
     }
 }, [hasInteracted, emblaApi, startAutoplay]);
 
 
-  // Check for touch device on mount
   useEffect(() => {
     isTouchDevice.current = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     if (isTouchDevice.current) {
-      setShowSwipeHint(true);
-      const timer = setTimeout(() => setShowSwipeHint(false), 2000); // Show hint for 2 seconds
-      return () => clearTimeout(timer);
+      const hintTimer = setTimeout(() => setShowSwipeHint(true), 500);
+      const hideTimer = setTimeout(() => setShowSwipeHint(false), 2500); 
+      return () => {
+        clearTimeout(hintTimer);
+        clearTimeout(hideTimer);
+      }
     }
   }, []);
   
@@ -168,17 +161,15 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       }
   }, [progress, emblaApi]);
   
-  const onInteraction = useCallback((api) => {
+  const onInteraction = useCallback((api: any) => {
     if (!api) return;
-    if (!hasInteracted) {
-      handleUserInteraction();
-    }
+    handleUserInteraction();
     
     clearAutoplayTimer();
     setProgress(0);
     const restartTimer = setTimeout(startAutoplay, 5000); 
     return () => clearTimeout(restartTimer);
-  }, [clearAutoplayTimer, startAutoplay, handleUserInteraction, hasInteracted]);
+  }, [clearAutoplayTimer, startAutoplay, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
     emblaApi?.scrollPrev();
@@ -196,19 +187,16 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       setActiveIndex(newIndex);
       setProgress(0);
       attemptToPlayVideo(emblaApi);
-       if (!isHovering) {
+      if (!isHovering) {
         startAutoplay();
       }
     };
     
-    const onPointerDown = () => {
-      onInteraction(emblaApi);
-    };
+    const onPointerDown = () => onInteraction(emblaApi);
 
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
     
-    // Start autoplay immediately on desktop
     if (!isTouchDevice.current) {
         startAutoplay();
     }
@@ -269,7 +257,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       <Header />
       <div className="relative h-screen w-full overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
-            {progress > 0 && <motion.div
+            {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <motion.div
                 className="h-full bg-primary"
                 initial={{ width: '0%' }}
                 animate={{ width: `${progress}%` }}
@@ -284,7 +272,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <HeroSlide
                   film={film}
                   isActive={index === activeIndex}
-                  isMuted={!isHovering && (!isTouchDevice.current || hasInteracted)}
+                  isMuted={!isHovering}
                   hasInteracted={hasInteracted}
                 />
               </div>
@@ -296,12 +284,12 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             {showSwipeHint && (
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: [0, 0.7, 0.7, 0] }}
+                    animate={{ opacity: [0, 0.5, 0.5, 0] }}
                     exit={{ opacity: 0 }}
-                    transition={{ duration: 2.2, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-30 top-24 left-0 right-0 flex items-center justify-center pointer-events-none"
+                    transition={{ duration: 2.0, times: [0, 0.1, 0.9, 1] }}
+                    className="absolute z-30 top-24 left-0 right-0 w-full flex items-center justify-center pointer-events-none"
                 >
-                    <div className="flex items-center gap-2 bg-black/20 text-white p-2 px-4 rounded-lg backdrop-blur-sm">
+                    <div className="flex items-center gap-2 bg-black/30 text-white p-2 px-4 rounded-lg backdrop-blur-sm">
                         <MoveHorizontal className="w-5 h-5"/>
                         <span className="text-sm font-light">Swipe to navigate</span>
                     </div>
@@ -312,8 +300,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-auto">
-                <div className='self-start mb-4 pointer-events-none'>
+            <div className="w-full">
+                <div className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
                 </div>
@@ -327,7 +315,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         exit="exit"
                         className="w-full"
                       >
-                        <div className="flex flex-col items-start text-left max-w-none pointer-events-none">
+                        <div className="flex flex-col items-start text-left max-w-none">
                             <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</motion.h1>
                             <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>

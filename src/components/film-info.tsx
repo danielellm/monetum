@@ -41,10 +41,10 @@ export default function FilmInfo({ film }: { film: Film }) {
             <FadeInWhenVisible>
                 <div className="text-sm font-mono space-y-2">
                   {film.cast.map((person) => (
-                    <div key={person.name} className="flex items-center">
-                        <span className="text-muted-foreground w-24 shrink-0">{person.role}</span>
+                    <div key={person.name} className="flex items-center justify-end">
+                        <span className="text-muted-foreground shrink-0">{person.role}</span>
                         <span className="text-muted-foreground mx-2">/</span>
-                        <span className="text-foreground">{person.name}</span>
+                        <span className="text-foreground whitespace-nowrap">{person.name}</span>
                     </div>
                   ))}
                 </div>

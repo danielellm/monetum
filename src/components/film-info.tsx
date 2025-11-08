@@ -31,17 +31,17 @@ export default function FilmInfo({ film }: { film: Film }) {
         <div className="w-full">
             <FadeInWhenVisible>
                 <div
-                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left max-w-4xl"
+                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
                     dangerouslySetInnerHTML={{ __html: film.description }}
                 />
             </FadeInWhenVisible>
             
             <FadeInWhenVisible>
                 <div className="mt-12 text-sm text-right font-mono">
-                  <p>
+                  <p className="flex flex-wrap justify-end">
                     {film.cast.map((person, index) => (
                       <React.Fragment key={person.name}>
-                        <span>
+                        <span className="whitespace-nowrap">
                           <span className="text-muted-foreground">{person.role}:</span> <span className="text-foreground">{person.name}</span>
                         </span>
                         {index < film.cast.length - 1 && <span className="mx-2 text-muted-foreground">/</span>}

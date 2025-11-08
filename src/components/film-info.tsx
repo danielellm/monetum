@@ -26,29 +26,31 @@ function FadeInWhenVisible({ children }: { children: React.ReactNode }) {
 
 export default function FilmInfo({ film }: { film: Film }) {
   return (
-    <div className="bg-background py-16 md:py-24 px-4 md:px-8">
-      <div className="max-w-4xl mx-auto">
-        <FadeInWhenVisible>
-            <div
-                className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
-                dangerouslySetInnerHTML={{ __html: film.description }}
-            />
-        </FadeInWhenVisible>
-        
-        <FadeInWhenVisible>
-            <div className="mt-12 text-sm text-right font-mono">
-              <p>
-                {film.cast.map((person, index) => (
-                  <React.Fragment key={person.name}>
-                    <span>
-                      <span className="text-muted-foreground">{person.role}:</span> <span className="text-foreground">{person.name}</span>
-                    </span>
-                    {index < film.cast.length - 1 && <span className="mx-2 text-muted-foreground">/</span>}
-                  </React.Fragment>
-                ))}
-              </p>
-            </div>
-        </FadeInWhenVisible>
+    <div className="bg-background py-16 md:py-24 px-4 md:px-6">
+      <div className="max-w-screen-2xl mx-auto">
+        <div className="max-w-4xl">
+            <FadeInWhenVisible>
+                <div
+                    className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
+                    dangerouslySetInnerHTML={{ __html: film.description }}
+                />
+            </FadeInWhenVisible>
+            
+            <FadeInWhenVisible>
+                <div className="mt-12 text-sm text-right font-mono">
+                  <p>
+                    {film.cast.map((person, index) => (
+                      <React.Fragment key={person.name}>
+                        <span>
+                          <span className="text-muted-foreground">{person.role}:</span> <span className="text-foreground">{person.name}</span>
+                        </span>
+                        {index < film.cast.length - 1 && <span className="mx-2 text-muted-foreground">/</span>}
+                      </React.Fragment>
+                    ))}
+                  </p>
+                </div>
+            </FadeInWhenVisible>
+        </div>
       </div>
 
       {film.gallery && film.gallery.length > 0 && (

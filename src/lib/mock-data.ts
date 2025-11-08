@@ -6,7 +6,7 @@ export const mockFilms: Film[] = [
     title: 'Der letzte Sommer',
     slug: 'der-letzte-sommer',
     subtitle: 'Ein Film von Momentum Film',
-    description: '<p>Ein intensives Coming-of-Age-Drama, das die letzten unbeschwerten Tage einer Gruppe von Freunden beleuchtet, bevor das Leben sie in unterschiedliche Richtungen treibt. Ein Film über Freundschaft, Verlust und das unvermeidliche Ende der Jugend.</p>',
+    description: '<p>Ein intensives Coming-of-Age-Drama, das die letzten unbeschwerten Tage einer Gruppe von Freunden beleuchtet, bevor das Leben sie in unterschiedliche Richtungen treibt. Ein Film über Freundschaft, Verlust und das unvermeidliche Ende der Jugend.</p><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>',
     trailer_url: 'https://videos.pexels.com/video-files/854653/854653-hd_1920_1080_30fps.mp4',
     poster_url: 'https://picsum.photos/seed/p1/1000/1500',
     gallery: [

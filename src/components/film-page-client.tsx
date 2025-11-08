@@ -71,25 +71,25 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   
   const [activeIndex, setActiveIndex] = useState(initialSlideIndex);
   const [progress, setProgress] = useState(0);
-  const [isHovering, setIsHovering] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [showSwipeHint, setShowSwipeHint] = useState(false);
   const isTouchDevice = useRef(false);
+  const [isHeroVisible, setIsHeroVisible] = useState(true);
   
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
+  const heroRef = useRef<HTMLDivElement>(null);
 
   const activeFilm = films[activeIndex];
 
   const attemptToPlayVideo = useCallback((api = emblaApi) => {
-    if (!api) return;
+    if (!api || !isHeroVisible) return;
     const slides = api.slideNodes();
     slides.forEach((slide, index) => {
         const video = slide?.querySelector('video');
         if (video) {
             const isSlideActive = index === api.selectedScrollSnap();
-            const playPromise = video.play();
-
             if (isSlideActive) {
+                const playPromise = video.play();
                 if (playPromise !== undefined) {
                     playPromise.catch(error => {
                         console.log("Autoplay was prevented by browser.");
@@ -100,7 +100,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             }
         }
     });
-  }, [emblaApi]);
+  }, [emblaApi, isHeroVisible]);
 
 
   const clearAutoplayTimer = useCallback(() => {
@@ -112,7 +112,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    if (isHovering) return;
+    if (!isHeroVisible) return;
     if (isTouchDevice.current && !hasInteracted) return;
 
     setProgress(0);
@@ -125,22 +125,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer, isHovering, hasInteracted]);
+  }, [clearAutoplayTimer, hasInteracted, isHeroVisible]);
 
  const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
         setHasInteracted(true);
-        if (emblaApi) {
-            const slides = emblaApi.slideNodes();
-            const currentSlide = slides[emblaApi.selectedScrollSnap()];
-            const video = currentSlide?.querySelector('video');
-            if (video && video.paused) {
-                video.play().catch(e => console.log("Still couldn't play after interaction."));
-            }
-        }
         startAutoplay();
     }
-}, [hasInteracted, emblaApi, startAutoplay]);
+}, [hasInteracted, startAutoplay]);
 
 
   useEffect(() => {
@@ -187,7 +179,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       setActiveIndex(newIndex);
       setProgress(0);
       attemptToPlayVideo(emblaApi);
-      if (!isHovering) {
+      if (isHeroVisible) {
         startAutoplay();
       }
     };
@@ -208,18 +200,45 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
       emblaApi.off('pointerDown', onPointerDown);
       clearAutoplayTimer();
     };
-  }, [emblaApi, isHovering, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, hasInteracted]);
+  }, [emblaApi, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, isHeroVisible]);
 
   useEffect(() => {
-    if (isHovering) {
+    const observer = new IntersectionObserver(
+        ([entry]) => {
+            setIsHeroVisible(entry.isIntersecting);
+        },
+        { threshold: 0.1 }
+    );
+
+    if (heroRef.current) {
+        observer.observe(heroRef.current);
+    }
+
+    return () => {
+        if (heroRef.current) {
+            observer.unobserve(heroRef.current);
+        }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isHeroVisible) {
+        attemptToPlayVideo();
+        startAutoplay();
+    } else {
         clearAutoplayTimer();
         setProgress(0);
-    } else {
-       if (!isTouchDevice.current || hasInteracted) {
-         startAutoplay();
-       }
+        if (emblaApi) {
+            emblaApi.slideNodes().forEach(slide => {
+                const video = slide.querySelector('video');
+                if (video && !video.paused) {
+                    video.pause();
+                }
+            });
+        }
     }
-  }, [isHovering, startAutoplay, clearAutoplayTimer, hasInteracted]);
+  }, [isHeroVisible, startAutoplay, clearAutoplayTimer, emblaApi, attemptToPlayVideo]);
+
   
   useEffect(() => {
     const newSlug = films[activeIndex]?.slug;
@@ -250,12 +269,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   return (
     <main
       className="bg-background text-foreground"
-      onMouseEnter={() => { if(!isTouchDevice.current && !isHovering) setIsHovering(true); }}
-      onMouseLeave={() => { if(!isTouchDevice.current && isHovering) setIsHovering(false); }}
       onTouchStart={handleUserInteraction}
     >
       <Header />
-      <div className="relative h-screen w-full overflow-hidden">
+      <div className="relative h-screen w-full overflow-hidden" ref={heroRef}>
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
             {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <motion.div
                 className="h-full bg-primary"
@@ -272,7 +289,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <HeroSlide
                   film={film}
                   isActive={index === activeIndex}
-                  isMuted={!isHovering}
+                  isMuted={true} // Always muted now
                   hasInteracted={hasInteracted}
                 />
               </div>

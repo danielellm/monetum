@@ -8,13 +8,12 @@ type HeroSlideProps = {
   film: Film;
   isActive: boolean;
   isMuted: boolean;
-  hasInteracted: boolean; // Keep this to know if the user has engaged
+  hasInteracted: boolean;
 };
 
 export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Define a reusable play function that handles errors
   const playVideo = async () => {
     const video = videoRef.current;
     if (video) {
@@ -23,34 +22,26 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
                 await video.play();
             }
         } catch (error) {
-            // This error is expected on mobile before user interaction
             console.log("Video play was prevented by the browser. Awaiting user interaction.");
         }
     }
   };
 
-  // Expose the play function for the parent component to call it
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    (video as any).customPlay = playVideo;
-  }, []);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-  
-    // On desktop (and after interaction on mobile), play the video if it's active
     if (isActive) {
-      playVideo();
+      if (hasInteracted || !('ontouchstart' in window || navigator.maxTouchPoints > 0)) {
+        playVideo();
+      }
     } else {
       video.pause();
       if (video.currentTime !== 0) {
         video.currentTime = 0;
       }
     }
-  }, [isActive, hasInteracted, film.trailer_url]); // Re-run when active status or interaction status changes
+  }, [isActive, hasInteracted, film.trailer_url]);
 
   useEffect(() => {
      if(videoRef.current) {
@@ -71,7 +62,7 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
         className="w-full h-full object-cover"
         loop
         playsInline
-        muted // Always start muted, parent controls via isMuted prop
+        muted={isMuted}
         preload="auto"
         src={film.trailer_url}
         poster={film.poster_url}

@@ -30,7 +30,7 @@ export default function FilmInfo({ film }: { film: Film }) {
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-16 items-start">
           
           {/* Left Column: Details */}
-          <div className="flex flex-col gap-12">
+          <div className="flex flex-col justify-between h-full min-h-[300px]">
             <FadeInWhenVisible>
                 <div
                     className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg"
@@ -39,7 +39,7 @@ export default function FilmInfo({ film }: { film: Film }) {
             </FadeInWhenVisible>
             
             <FadeInWhenVisible>
-                <div className="text-sm font-mono text-right flex flex-wrap justify-end">
+                <div className="text-sm font-mono text-right flex flex-wrap justify-end mt-12 md:mt-0">
                   {film.cast.map((person, index) => (
                     <React.Fragment key={person.name}>
                       <span className="inline-flex">

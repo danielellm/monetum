@@ -12,6 +12,7 @@ import FilmInfo from './film-info';
 import Footer from './footer';
 import Header from './header';
 import Gallery from './gallery';
+import TrailerEmbed from './trailer-embed';
 
 type FilmPageClientProps = {
   films: Film[];
@@ -38,7 +39,7 @@ const titleVariants = {
   visible: { 
     opacity: 1, 
     x: 0, 
-    transition: { delay: 0.3, duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
+    transition: { delay: 0.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
   },
 };
 
@@ -47,7 +48,7 @@ const detailsVariants = {
   visible: { 
     opacity: 1, 
     x: 0, 
-    transition: { delay: 0.5, duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
+    transition: { delay: 0.6, duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
   },
 };
 
@@ -160,8 +161,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     
     clearAutoplayTimer();
     setProgress(0);
-    const restartTimer = setTimeout(startAutoplay, 5000); 
-    return () => clearTimeout(restartTimer);
+    if (!isTouchDevice.current) { // No restart on hover on desktop
+        const restartTimer = setTimeout(startAutoplay, 5000); 
+        return () => clearTimeout(restartTimer);
+    }
   }, [clearAutoplayTimer, startAutoplay, handleUserInteraction]);
 
   const scrollPrev = useCallback(() => {
@@ -290,7 +293,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <HeroSlide
                   film={film}
                   isActive={index === activeIndex}
-                  isMuted={true} // Always muted now
+                  isMuted={true}
                   hasInteracted={hasInteracted}
                 />
               </div>
@@ -334,7 +337,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         className="w-full"
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</motion.h1>
+                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words pointer-events-auto">{activeFilm.title}</motion.h1>
                             <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                                <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
@@ -399,6 +402,30 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
                     >
                         <Gallery images={activeFilm.gallery} />
+                    </motion.div>
+                </div>
+            )}
+        </motion.div>
+      </AnimatePresence>
+
+      <AnimatePresence mode="wait">
+        <motion.div
+            key={`${activeFilm.id}-trailer`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.7 }}
+        >
+            {activeFilm.additional_trailer_url && (
+                <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.3 }}
+                        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
+                    >
+                        <h3 className="text-3xl font-headline text-primary mb-8 text-center">Trailer</h3>
+                        <TrailerEmbed url={activeFilm.additional_trailer_url} />
                     </motion.div>
                 </div>
             )}

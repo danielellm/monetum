@@ -1,7 +1,6 @@
 'use client';
 
 import { Film } from '@/lib/types';
-import TrailerEmbed from './trailer-embed';
 import { motion } from 'framer-motion';
 import React from 'react';
 
@@ -51,15 +50,6 @@ export default function FilmInfo({ film }: { film: Film }) {
             </FadeInWhenVisible>
         </div>
       </div>
-
-      {film.additional_trailer_url && (
-         <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
-            <FadeInWhenVisible>
-                <h3 className="text-3xl font-headline text-primary mb-8 text-center">Trailer</h3>
-                <TrailerEmbed url={film.additional_trailer_url} />
-            </FadeInWhenVisible>
-         </div>
-      )}
     </div>
   );
 }

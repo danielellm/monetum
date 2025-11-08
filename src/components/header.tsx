@@ -110,7 +110,7 @@ export default function Header({ films }: HeaderProps) {
                     animate="visible"
                     className="text-3xl font-headline text-white hover:text-primary transition-colors"
                 >
-                    <p className="mb-4">Movies</p>
+                    <p className="mb-4 text-center">Movies</p>
                     <div className="flex flex-col items-center gap-4">
                         {films.map((film, i) => (
                            <Link key={film.id} href={`/filme/${film.slug}`} passHref legacyBehavior>

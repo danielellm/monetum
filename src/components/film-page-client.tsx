@@ -81,6 +81,8 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const heroRef = useRef<HTMLDivElement>(null);
 
   const activeFilm = films[activeIndex];
+  const nextFilm = films[(activeIndex + 1) % films.length];
+  const prevFilm = films[(activeIndex - 1 + films.length) % films.length];
 
   const attemptToPlayVideo = useCallback((api = emblaApi) => {
     if (!api || !isHeroVisible) return;
@@ -188,9 +190,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     emblaApi.on('select', onSelect);
     emblaApi.on('pointerDown', onPointerDown);
     
+    // Keinen Hover-Effekt auf Touch-Geräten
     if (!isTouchDevice.current) {
-        emblaApi.on('pointerMove', onInteraction);
-        startAutoplay();
+      // Diese Zeile hat den Hover-Stopp verursacht, sie wird entfernt.
+      // emblaApi.on('pointerMove', onInteraction);
+      startAutoplay();
     }
 
     attemptToPlayVideo(emblaApi); 
@@ -198,7 +202,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     return () => {
       emblaApi.off('select', onSelect);
       emblaApi.off('pointerDown', onPointerDown);
-      emblaApi.off('pointerMove', onInteraction);
+      // emblaApi.off('pointerMove', onInteraction);
       clearAutoplayTimer();
     };
   }, [emblaApi, startAutoplay, clearAutoplayTimer, onInteraction, attemptToPlayVideo, isHeroVisible]);
@@ -211,13 +215,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         { threshold: 0.1 }
     );
 
-    if (heroRef.current) {
-        observer.observe(heroRef.current);
+    const currentHeroRef = heroRef.current;
+    if (currentHeroRef) {
+        observer.observe(currentHeroRef);
     }
 
     return () => {
-        if (heroRef.current) {
-            observer.unobserve(heroRef.current);
+        if (currentHeroRef) {
+            observer.unobserve(currentHeroRef);
         }
     };
   }, []);
@@ -318,7 +323,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-none">
+            <div className="w-full">
                 <div className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
@@ -404,6 +409,41 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             )}
         </motion.div>
       </AnimatePresence>
+
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+        <div className="flex items-center gap-8">
+            <motion.button 
+                onClick={scrollPrev} 
+                className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
+                whileHover="hover"
+            >
+                <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                    <ArrowLeft className="h-6 w-6" />
+                </motion.div>
+                <div className="overflow-hidden">
+                    <motion.div variants={{ hover: { x: -10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevFilm.title}</p>
+                    </motion.div>
+                </div>
+            </motion.button>
+            <motion.button 
+                onClick={scrollNext} 
+                className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
+                whileHover="hover"
+            >
+                <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                    <ArrowRight className="h-6 w-6" />
+                </motion.div>
+                 <div className="overflow-hidden">
+                    <motion.div variants={{ hover: { x: 10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextFilm.title}</p>
+                    </motion.div>
+                </div>
+            </motion.button>
+        </div>
+      </div>
 
       <Footer />
     </main>

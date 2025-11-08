@@ -313,7 +313,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
             <div className="w-full pointer-events-auto">
-                <div className='self-start mb-4'>
+                <div className='self-start mb-4 pointer-events-none'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
                 </div>
@@ -327,9 +327,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         exit="exit"
                         className="w-full"
                       >
-                        <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words pointer-events-none">{activeFilm.title}</motion.h1>
-                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider pointer-events-none">
+                        <div className="flex flex-col items-start text-left max-w-none pointer-events-none">
+                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</motion.h1>
+                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
                                <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
                                <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
@@ -381,3 +381,4 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   );
 }
  
+    

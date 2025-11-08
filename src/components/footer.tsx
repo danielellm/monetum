@@ -1,5 +1,7 @@
 'use client';
 
+import ImpressumDialog from './impressum-dialog';
+
 export default function Footer() {
   return (
     <footer className="bg-black py-8 px-4 md:px-8">
@@ -12,9 +14,7 @@ export default function Footer() {
 
         {/* Right: Impressum Link */}
         <div className="text-center sm:text-right">
-            <a href="/impressum" className="text-sm text-muted-foreground hover:text-primary transition-colors">
-                Impressum
-            </a>
+            <ImpressumDialog />
         </div>
 
       </div>

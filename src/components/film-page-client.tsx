@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowLeft, ArrowRight, MoveHorizontal } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MoveHorizontal, Github, Twitter, Instagram } from 'lucide-react';
 
 import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
@@ -320,7 +320,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
           <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
-            <div className="w-full pointer-events-none">
+            <div className="w-full">
                 <div className='self-start mb-4'>
                     <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
                     <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
@@ -439,6 +439,36 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                     </motion.div>
                 </div>
             </motion.button>
+        </div>
+      </div>
+
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+        <div className="w-full flex flex-col items-end gap-8">
+            <div className="text-right flex flex-col sm:flex-row sm:gap-12">
+                <div className="mb-6 sm:mb-0">
+                    <h3 className="text-sm text-muted-foreground">say hello</h3>
+                    <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
+                </div>
+                <div>
+                    <h3 className="text-sm text-muted-foreground">location</h3>
+                    <div className="text-white not-italic">
+                        <p>MOMENTUM FILM</p>
+                        <p>Lindenstr. 114</p>
+                        <p>10969 Berlin</p>
+                    </div>
+                </div>
+            </div>
+             <div className="flex items-center gap-4">
+              <a href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
+                <Instagram />
+              </a>
+              <a href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
+                <Twitter />
+              </a>
+              <a href="#" aria-label="Github" className="text-muted-foreground hover:text-primary transition-colors">
+                <Github />
+              </a>
+            </div>
         </div>
       </div>
 

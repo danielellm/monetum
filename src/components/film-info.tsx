@@ -4,6 +4,7 @@ import { Film } from '@/lib/types';
 import Gallery from './gallery';
 import TrailerEmbed from './trailer-embed';
 import { motion } from 'framer-motion';
+import React from 'react';
 
 const fadeInVariant = {
   hidden: { opacity: 0, y: 20 },
@@ -35,10 +36,15 @@ export default function FilmInfo({ film }: { film: Film }) {
         </FadeInWhenVisible>
         
         <FadeInWhenVisible>
-            <div className="mt-12 text-sm text-right text-gray-400 font-mono space-y-2">
-                {film.cast.map((person) => (
-                    <p key={person.name}><strong>{person.role}:</strong> {person.name}</p>
+            <div className="mt-12 text-sm text-right text-gray-400 font-mono">
+              <p>
+                {film.cast.map((person, index) => (
+                  <React.Fragment key={person.name}>
+                    <span><strong>{person.role}:</strong> {person.name}</span>
+                    {index < film.cast.length - 1 && <span className="mx-2">/</span>}
+                  </React.Fragment>
                 ))}
+              </p>
             </div>
         </FadeInWhenVisible>
       </div>

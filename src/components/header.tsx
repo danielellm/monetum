@@ -8,8 +8,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const navLinks = [
-    { href: '#', label: 'About Us' },
-    { href: '#', label: 'Contact' },
+    { href: '#contact', label: 'Contact' },
   ];
 
   const menuVariants = {
@@ -32,7 +31,7 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 p-4 md:p-6 text-white bg-transparent">
+      <header className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 text-white bg-transparent">
         <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
           <a href="/" className="flex items-center gap-2 font-headline text-lg hover:text-primary transition-colors">
             <Film className="h-5 w-5" />

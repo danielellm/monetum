@@ -441,7 +441,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         </div>
       </div>
 
-      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+      <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
         <div className="w-full flex flex-col items-end gap-y-12">
             <div className="text-right flex flex-col gap-8">
                 <div>

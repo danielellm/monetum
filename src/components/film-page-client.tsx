@@ -445,11 +445,11 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         <div className="w-full flex flex-col items-end gap-y-12">
             <div className="text-right flex flex-col gap-8">
                 <div>
-                    <h3 className="text-sm text-muted-foreground">say hello</h3>
+                    <h3 className="text-sm text-primary">say hello</h3>
                     <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
                 </div>
                 <div>
-                    <h3 className="text-sm text-muted-foreground">location</h3>
+                    <h3 className="text-sm text-primary">location</h3>
                     <div className="text-white not-italic">
                         <p>MOMENTUM FILM</p>
                         <p>Lindenstr. 114</p>
@@ -458,13 +458,13 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 </div>
             </div>
              <div className="flex items-center gap-4">
-              <a href="#" aria-label="Instagram" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
                 <Instagram />
               </a>
-              <a href="#" aria-label="Twitter" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" aria-label="Twitter" className="text-primary hover:text-primary/80 transition-colors">
                 <Twitter />
               </a>
-              <a href="#" aria-label="Github" className="text-muted-foreground hover:text-primary transition-colors">
+              <a href="#" aria-label="Github" className="text-primary hover:text-primary/80 transition-colors">
                 <Github />
               </a>
             </div>

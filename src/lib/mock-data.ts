@@ -14,6 +14,10 @@ export const mockFilms: Film[] = [
       'https://picsum.photos/seed/g12/1600/900',
       'https://picsum.photos/seed/g13/1600/900',
       'https://picsum.photos/seed/g14/1600/900',
+      'https://picsum.photos/seed/g15/1600/900',
+      'https://picsum.photos/seed/g16/1600/900',
+      'https://picsum.photos/seed/g17/1600/900',
+      'https://picsum.photos/seed/g18/1600/900',
     ],
     cast: [
       { name: 'Max Müller', role: 'Hauptrolle' },

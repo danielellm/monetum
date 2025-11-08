@@ -26,9 +26,9 @@ function FadeInWhenVisible({ children }: { children: React.ReactNode }) {
 
 export default function FilmInfo({ film }: { film: Film }) {
   return (
-    <div className="bg-background py-16 md:py-24 px-4 md:px-6">
-      <div className="max-w-screen-2xl mx-auto">
-        <div className="w-full">
+    <div className="bg-background py-16 md:py-24">
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
+        <div className="w-full max-w-4xl mx-auto">
             <FadeInWhenVisible>
                 <div
                     className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg text-left"
@@ -54,16 +54,15 @@ export default function FilmInfo({ film }: { film: Film }) {
       </div>
 
       {film.gallery && film.gallery.length > 0 && (
-        <div className="max-w-6xl mx-auto mt-16 md:mt-24">
+        <div className="w-full mt-16 md:mt-24">
             <FadeInWhenVisible>
-                <h3 className="text-3xl font-headline text-primary mb-8 text-center">Galerie</h3>
                 <Gallery images={film.gallery} />
             </FadeInWhenVisible>
         </div>
       )}
 
       {film.additional_trailer_url && (
-         <div className="max-w-4xl mx-auto mt-16 md:mt-24">
+         <div className="max-w-4xl mx-auto mt-16 md:mt-24 px-4 md:px-6">
             <FadeInWhenVisible>
                 <h3 className="text-3xl font-headline text-primary mb-8 text-center">Trailer</h3>
                 <TrailerEmbed url={film.additional_trailer_url} />

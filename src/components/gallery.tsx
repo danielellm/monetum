@@ -1,13 +1,18 @@
 'use client';
 
 import Image from 'next/image';
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from '@/components/ui/carousel';
 import {
   Dialog,
   DialogContent,
 } from '@/components/ui/dialog';
+import { useState } from 'react';
 
 type GalleryProps = {
   images: string[];
@@ -18,26 +23,37 @@ export default function Gallery({ images }: GalleryProps) {
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {images.map((src, index) => (
-          <motion.div
-            key={index}
-            className="aspect-video relative overflow-hidden rounded-lg cursor-pointer group"
-            onClick={() => setSelectedImage(src)}
-            whileHover={{ scale: 1.05 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Image
-              src={src}
-              alt={`Galeriebild ${index + 1}`}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-110"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-              data-ai-hint="cinematic shot"
-            />
-          </motion.div>
-        ))}
-      </div>
+      <Carousel
+        opts={{
+          align: 'start',
+          loop: true,
+        }}
+        className="w-full"
+      >
+        <CarouselContent className="-ml-1">
+          {images.map((src, index) => (
+            <CarouselItem key={index} className="basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 pl-1">
+              <div
+                className="aspect-video relative overflow-hidden cursor-pointer group"
+                onClick={() => setSelectedImage(src)}
+              >
+                <Image
+                  src={src}
+                  alt={`Galeriebild ${index + 1}`}
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-105"
+                  sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                  data-ai-hint="cinematic shot"
+                />
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <div className="hidden md:block">
+          <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white border-none hover:bg-black/70" />
+          <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-black/50 text-white border-none hover:bg-black/70" />
+        </div>
+      </Carousel>
 
       <Dialog open={!!selectedImage} onOpenChange={(isOpen) => !isOpen && setSelectedImage(null)}>
         <DialogContent className="max-w-5xl w-full p-2 bg-transparent border-0">

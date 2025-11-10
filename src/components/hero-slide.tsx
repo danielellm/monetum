@@ -1,17 +1,17 @@
 'use client';
 
-import { Film } from '@/lib/types';
+import { SliderItem } from '@/lib/types';
 import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
 type HeroSlideProps = {
-  film: Film;
+  item: SliderItem;
   isActive: boolean;
   isMuted: boolean;
   hasInteracted: boolean;
 };
 
-export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: HeroSlideProps) {
+export default function HeroSlide({ item, isActive, isMuted, hasInteracted }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const playVideo = async () => {
@@ -41,13 +41,15 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
         video.currentTime = 0;
       }
     }
-  }, [isActive, hasInteracted, film.trailer_url]);
+  }, [isActive, hasInteracted, item.trailer_url]);
 
   useEffect(() => {
      if(videoRef.current) {
         videoRef.current.muted = isMuted;
      }
   }, [isMuted]);
+  
+  const posterUrl = 'poster_url' in item ? item.poster_url : undefined;
 
   return (
     <motion.div
@@ -58,14 +60,14 @@ export default function HeroSlide({ film, isActive, isMuted, hasInteracted }: He
     >
       <video
         ref={videoRef}
-        key={film.trailer_url}
+        key={item.trailer_url}
         className="w-full h-full object-cover"
         loop
         playsInline
         muted={isMuted}
         preload="auto"
-        src={film.trailer_url}
-        poster={film.poster_url}
+        src={item.trailer_url}
+        poster={posterUrl}
       />
     </motion.div>
   );

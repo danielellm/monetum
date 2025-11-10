@@ -1,9 +1,8 @@
-import { getFilms } from '@/lib/api';
-import type { Film } from '@/lib/types';
+import { getSliderItems, getItemBySlug } from '@/lib/api';
+import type { SliderItem } from '@/lib/types';
 import FilmPageClient from '@/components/film-page-client';
 import { notFound } from 'next/navigation';
 import type { Metadata, ResolvingMetadata } from 'next'
-import { getFilmBySlug } from '@/lib/api';
 
 type Props = {
   params: { slug: string }
@@ -13,55 +12,58 @@ export async function generateMetadata(
   { params }: Props,
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  // Fetch the specific film for metadata
-  const film = await getFilmBySlug(params.slug);
+  // Fetch the specific item for metadata
+  const item = await getItemBySlug(params.slug);
 
-  if (!film) {
+  if (!item) {
     return {
-      title: 'Film nicht gefunden | Momentum Film'
+      title: 'Seite nicht gefunden | Momentum Film'
     }
   }
 
-  // Generate metadata based on the film's details
+  const description = item.description.replace(/<[^>]*>?/gm, '').substring(0, 160);
+  
+  // Use poster_url if it's a film
+  const imageUrl = 'poster_url' in item ? item.poster_url : undefined;
+
   return {
-    title: `${film.title} | Momentum Film`,
-    description: film.description.replace(/<[^>]*>?/gm, '').substring(0, 160),
+    title: `${item.title} | Momentum Film`,
+    description: description,
     openGraph: {
-      title: film.title,
-      description: film.description.replace(/<[^>]*>?/gm, '').substring(0, 160),
-      images: [
+      title: item.title,
+      description: description,
+      images: imageUrl ? [
         {
-          url: film.poster_url,
+          url: imageUrl,
           width: 1000,
           height: 1500,
-          alt: `Poster for ${film.title}`,
+          alt: `Poster for ${item.title}`,
         },
-      ],
+      ] : [],
     },
   }
 }
 
 export async function generateStaticParams() {
-  const films = await getFilms();
-  // Map films to the required format for static paths
-  return films.map((film) => ({
-    slug: film.slug,
+  const items = await getSliderItems();
+  // Map all slider items to the required format for static paths
+  return items.map((item) => ({
+    slug: item.slug,
   }));
 }
 
 export default async function FilmPage({ params }: Props) {
-  // Fetch all films. The sorting will now be handled inside the client component.
-  const films: Film[] = await getFilms();
+  // Fetch all slider items (films + about us page)
+  const sliderItems: SliderItem[] = await getSliderItems();
   
-  // Find the currently active film based on the slug to validate it exists
-  const currentFilmExists = films.some(f => f.slug === params.slug);
+  // Find the currently active item based on the slug to validate it exists
+  const currentItemExists = sliderItems.some(f => f.slug === params.slug);
 
-  if (!currentFilmExists) {
-    // If the film is not found, show a 404 page
+  if (!currentItemExists) {
+    // If the item is not found, show a 404 page
     notFound();
   }
 
-  // Pass the unsorted list of films and the initial slug to the client component
-  // The client component is now responsible for sorting
-  return <FilmPageClient films={films} initialSlug={params.slug} />;
+  // Pass the list of all slider items and the initial slug to the client component
+  return <FilmPageClient sliderItems={sliderItems} initialSlug={params.slug} />;
 }

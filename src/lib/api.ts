@@ -1,17 +1,27 @@
-import { mockFilms } from './mock-data';
-import type { Film } from './types';
+import { mockFilms, mockAboutInfo } from './mock-data';
+import type { Film, SliderItem, AboutInfo } from './types';
 
 // Simulate network delay
 const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
 
-export async function getFilms(): Promise<Film[]> {
+// This function now returns all items for the slider, including films and the about page
+export async function getSliderItems(): Promise<SliderItem[]> {
   await delay(100); // Simulate API latency
-  // Return the films without sorting them here, as sorting is handled by the component
+  
+  // Sort films by slider_position
+  const sortedFilms = [...mockFilms].sort((a, b) => a.slider_position - b.slider_position);
+  
+  // Append the about info at the end
+  return [...sortedFilms, mockAboutInfo];
+}
+
+export async function getFilms(): Promise<Film[]> {
+  await delay(100);
   return [...mockFilms];
 }
 
-export async function getFilmBySlug(slug: string): Promise<Film | undefined> {
-  await delay(100); // Simulate API latency
-  // Find a specific film by its slug
-  return mockFilms.find(film => film.slug === slug);
+export async function getItemBySlug(slug: string): Promise<SliderItem | undefined> {
+  await delay(100);
+  const items = [...mockFilms, mockAboutInfo];
+  return items.find(item => item.slug === slug);
 }

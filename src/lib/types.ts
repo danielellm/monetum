@@ -15,3 +15,19 @@ export type Film = {
   slider_position: number;
   is_startpage: boolean;
 };
+
+export type AboutInfo = {
+  id: 'about-us';
+  title: string;
+  slug: 'about-us';
+  subtitle: string;
+  description: string;
+  trailer_url: string;
+};
+
+export type SliderItem = Film | AboutInfo;
+
+// Type guard to check if an item is a Film
+export function isFilm(item: SliderItem): item is Film {
+  return (item as Film).slider_position !== undefined;
+}

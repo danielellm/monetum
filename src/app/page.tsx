@@ -13,10 +13,12 @@ export default async function HomePage() {
     );
   }
 
+  // Find the start film, ignoring the about page
   const startFilm = films.find(film => film.is_startpage) 
                     || films.sort((a, b) => a.slider_position - b.slider_position)[0];
 
   if (startFilm) {
+    // Redirect to the film-specific route
     redirect(`/filme/${startFilm.slug}`);
   }
 

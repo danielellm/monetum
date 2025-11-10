@@ -1,6 +1,7 @@
 'use client';
 
-import type { Film } from '@/lib/types';
+import type { SliderItem, Film } from '@/lib/types';
+import { isFilm } from '@/lib/types';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import useEmblaCarousel from 'embla-carousel-react';
@@ -14,7 +15,7 @@ import Header from './header';
 import Gallery from './gallery';
 
 type FilmPageClientProps = {
-  films: Film[];
+  sliderItems: SliderItem[];
   initialSlug: string;
 };
 
@@ -52,18 +53,15 @@ const detailsVariants = {
 };
 
 
-export default function FilmPageClient({ films: unsortedFilms, initialSlug }: FilmPageClientProps) {
+export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
   
-  const films = useMemo(() => 
-    [...unsortedFilms].sort((a, b) => a.slider_position - b.slider_position),
-    [unsortedFilms]
-  );
+  const filmsOnly = useMemo(() => sliderItems.filter(isFilm), [sliderItems]);
 
   const initialSlideIndex = useMemo(() => {
-    const index = films.findIndex((f) => f.slug === initialSlug);
+    const index = sliderItems.findIndex((f) => f.slug === initialSlug);
     return index >= 0 ? index : 0;
-  }, [films, initialSlug]);
+  }, [sliderItems, initialSlug]);
   
   const [emblaRef, emblaApi] = useEmblaCarousel({
     loop: true,
@@ -80,9 +78,9 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   const autoplayTimer = useRef<NodeJS.Timeout | null>(null);
   const heroRef = useRef<HTMLDivElement>(null);
 
-  const activeFilm = films[activeIndex];
-  const nextFilm = films[(activeIndex + 1) % films.length];
-  const prevFilm = films[(activeIndex - 1 + films.length) % films.length];
+  const activeItem = sliderItems[activeIndex];
+  const nextItem = sliderItems[(activeIndex + 1) % sliderItems.length];
+  const prevItem = sliderItems[(activeIndex - 1 + sliderItems.length) % sliderItems.length];
 
   const attemptToPlayVideo = useCallback((api = emblaApi) => {
     if (!api || !isHeroVisible) return;
@@ -115,7 +113,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   const startAutoplay = useCallback(() => {
     clearAutoplayTimer();
-    if (!isHeroVisible) return;
+    if (!isHeroVisible || !isFilm(activeItem)) return; // No autoplay on "About Us"
     if (isTouchDevice.current && !hasInteracted) return;
 
     setProgress(0);
@@ -128,7 +126,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
         });
     }, 100);
     autoplayTimer.current = timer;
-  }, [clearAutoplayTimer, hasInteracted, isHeroVisible]);
+  }, [clearAutoplayTimer, hasInteracted, isHeroVisible, activeItem]);
 
  const handleUserInteraction = useCallback(() => {
     if (!hasInteracted) {
@@ -151,10 +149,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
   }, []);
   
   useEffect(() => {
-      if (progress >= 100) {
+      if (progress >= 100 && isFilm(activeItem)) {
           emblaApi?.scrollNext();
       }
-  }, [progress, emblaApi]);
+  }, [progress, emblaApi, activeItem]);
   
   const onInteraction = useCallback((api: any) => {
     if (!api) return;
@@ -243,17 +241,23 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
   
   useEffect(() => {
-    const newSlug = films[activeIndex]?.slug;
-    if (newSlug && window.location.pathname !== `/filme/${newSlug}`) {
-      window.history.pushState({}, '', `/filme/${newSlug}`);
+    const newSlug = sliderItems[activeIndex]?.slug;
+    const isAboutPage = newSlug === 'about-us';
+    const currentPath = window.location.pathname;
+    const newPath = isAboutPage ? '/about-us' : `/filme/${newSlug}`;
+
+    if (newSlug && currentPath !== newPath) {
+      window.history.pushState({}, '', newPath);
     }
     if (emblaApi) {
-        const nextIndex = (activeIndex + 1) % films.length;
-        const prevIndex = (activeIndex - 1 + films.length) % films.length;
-        router.prefetch(`/filme/${films[nextIndex].slug}`);
-        router.prefetch(`/filme/${films[prevIndex].slug}`);
+        const nextIndex = (activeIndex + 1) % sliderItems.length;
+        const prevIndex = (activeIndex - 1 + sliderItems.length) % sliderItems.length;
+        const nextSlug = sliderItems[nextIndex].slug;
+        const prevSlug = sliderItems[prevIndex].slug;
+        router.prefetch(nextSlug === 'about-us' ? '/about-us' : `/filme/${nextSlug}`);
+        router.prefetch(prevSlug === 'about-us' ? '/about-us' : `/filme/${prevSlug}`);
     }
-  }, [activeIndex, films, router, emblaApi]);
+  }, [activeIndex, sliderItems, router, emblaApi]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -264,16 +268,18 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [scrollNext, scrollPrev]);
 
-  if (!activeFilm) {
+  if (!activeItem) {
     return null;
   }
+
+  const activeIsFilm = isFilm(activeItem);
 
   return (
     <main
       className="bg-background text-foreground"
       onTouchStart={handleUserInteraction}
     >
-      <Header films={films} />
+      <Header films={filmsOnly} />
       <div className="relative h-screen w-full overflow-hidden" ref={heroRef}>
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
             {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <motion.div
@@ -286,10 +292,10 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
         <div className="overflow-hidden h-full" ref={emblaRef}>
           <div className="flex h-full">
-            {films.map((film, index) => (
-              <div className="relative flex-[0_0_100%] h-full" key={film.id}>
+            {sliderItems.map((item, index) => (
+              <div className="relative flex-[0_0_100%] h-full" key={item.id}>
                 <HeroSlide
-                  film={film}
+                  item={item}
                   isActive={index === activeIndex}
                   isMuted={true}
                   hasInteracted={hasInteracted}
@@ -321,13 +327,19 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
             
             <div className="w-full">
                 <div className='self-start mb-4'>
-                    <span className="text-xl md:text-2xl text-primary font-normal">{String(activeIndex + 1).padStart(2, '0')}</span>
-                    <span className="text-sm md:text-base text-gray-500">/{String(films.length).padStart(2, '0')}</span>
+                    {activeIsFilm ? (
+                      <>
+                        <span className="text-xl md:text-2xl text-primary font-normal">{String(filmsOnly.findIndex(f => f.id === activeItem.id) + 1).padStart(2, '0')}</span>
+                        <span className="text-sm md:text-base text-gray-500">/{String(filmsOnly.length).padStart(2, '0')}</span>
+                      </>
+                    ) : (
+                      <span className="text-xl md:text-2xl text-primary font-headline">About Us</span>
+                    )}
                 </div>
 
                 <AnimatePresence mode="wait">
                      <motion.div
-                        key={activeFilm.id}
+                        key={activeItem.id}
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
@@ -335,12 +347,14 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         className="w-full"
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeFilm.title}</motion.h1>
-                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                               <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeFilm.genre}</span></p>
-                               <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeFilm.duration}</span></p>
-                               <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeFilm.language}</span></p>
-                            </motion.div>
+                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</motion.h1>
+                            {activeIsFilm && (
+                              <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                                 <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
+                                 <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
+                                 <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
+                              </motion.div>
+                            )}
                         </div>
                      </motion.div>
                 </AnimatePresence>
@@ -373,25 +387,42 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
 
       <AnimatePresence mode="wait">
         <motion.div
-            key={activeFilm.id}
+            key={activeItem.id}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7 }}
         >
-            <FilmInfo film={activeFilm} />
+          {activeIsFilm && <FilmInfo film={activeItem} />}
+          {!activeIsFilm && (
+             <div className="bg-background py-16 md:py-24">
+                <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
+                    <motion.div
+                        variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { ease: [0.6, 0.01, 0.05, 0.95], duration: 1.2 } } }}
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, amount: 0.2 }}
+                    >
+                        <div
+                            className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg max-w-4xl"
+                            dangerouslySetInnerHTML={{ __html: activeItem.description }}
+                        />
+                    </motion.div>
+                </div>
+             </div>
+          )}
         </motion.div>
       </AnimatePresence>
       
       <AnimatePresence mode="wait">
         <motion.div
-            key={`${activeFilm.id}-gallery`}
+            key={`${activeItem.id}-gallery`}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.7 }}
         >
-            {activeFilm.gallery && activeFilm.gallery.length > 0 && (
+            {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
                      <motion.div
                         initial="hidden"
@@ -399,7 +430,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                         viewport={{ once: true, amount: 0.1 }}
                         variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
                     >
-                        <Gallery images={activeFilm.gallery} />
+                        <Gallery images={activeItem.gallery} />
                     </motion.div>
                 </div>
             )}
@@ -419,7 +450,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                 <div className="overflow-hidden">
                     <motion.div variants={{ hover: { x: 10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }} className="group-hover:-translate-x-full">
                         <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
-                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevFilm.title}</p>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
                     </motion.div>
                 </div>
             </motion.button>
@@ -434,7 +465,7 @@ export default function FilmPageClient({ films: unsortedFilms, initialSlug }: Fi
                  <div className="overflow-hidden text-right">
                     <motion.div variants={{ hover: { x: -10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
                         <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
-                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextFilm.title}</p>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
                     </motion.div>
                 </div>
             </motion.button>

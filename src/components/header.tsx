@@ -19,11 +19,6 @@ type HeaderProps = {
 export default function Header({ films }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const navLinks = [
-    { href: '#about', label: 'About Us' },
-    { href: '#contact', label: 'Contact' },
-  ];
-
   const menuVariants = {
     hidden: { opacity: 0, y: '-100%' },
     visible: { opacity: 1, y: '0%', transition: { duration: 0.5, ease: 'easeInOut' } },
@@ -68,11 +63,12 @@ export default function Header({ films }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {navLinks.map((link) => (
-              <a key={link.label} href={link.href} className="hover:text-primary transition-colors">
-                {link.label}
-              </a>
-            ))}
+            <Link href="/about-us" className="hover:text-primary transition-colors">
+              About Us
+            </Link>
+            <a href="#contact" className="hover:text-primary transition-colors">
+              Contact
+            </a>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -108,11 +104,11 @@ export default function Header({ films }: HeaderProps) {
                     variants={linkVariants}
                     initial="hidden"
                     animate="visible"
-                    className="text-3xl font-headline text-white"
+                    className="text-3xl font-headline text-white text-center"
                 >
                     <p className="mb-4">Movies</p>
                     <div className="flex flex-col items-center gap-4">
-                        {films.map((film, i) => (
+                        {films.map((film) => (
                            <Link key={film.id} href={`/filme/${film.slug}`} onClick={() => setIsMenuOpen(false)} className="text-xl font-body text-gray-300 hover:text-primary transition-colors">
                                {film.title}
                            </Link>
@@ -120,19 +116,26 @@ export default function Header({ films }: HeaderProps) {
                     </div>
                 </motion.div>
 
-                {navLinks.map((link, i) => (
-                    <motion.a
-                        key={link.label}
-                        href={link.href}
-                        custom={i + 1}
-                        variants={linkVariants}
-                        initial="hidden"
-                        animate="visible"
-                        onClick={() => setIsMenuOpen(false)}
-                        className="text-3xl font-headline text-white hover:text-primary transition-colors">
-                        {link.label}
-                    </motion.a>
-                ))}
+                <motion.a
+                    href="/about-us"
+                    custom={1}
+                    variants={linkVariants}
+                    initial="hidden"
+                    animate="visible"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-3xl font-headline text-white hover:text-primary transition-colors">
+                    About Us
+                </motion.a>
+                <motion.a
+                    href="#contact"
+                    custom={2}
+                    variants={linkVariants}
+                    initial="hidden"
+                    animate="visible"
+                    onClick={() => setIsMenuOpen(false)}
+                    className="text-3xl font-headline text-white hover:text-primary transition-colors">
+                    Contact
+                </motion.a>
             </nav>
           </motion.div>
         )}

@@ -1,4 +1,4 @@
-import type { Film } from './types';
+import type { Film, AboutInfo } from './types';
 
 export const mockFilms: Film[] = [
   {
@@ -80,3 +80,12 @@ export const mockFilms: Film[] = [
     is_startpage: false,
   },
 ];
+
+export const mockAboutInfo: AboutInfo = {
+  id: 'about-us',
+  title: 'Momentum Film',
+  slug: 'about-us',
+  subtitle: 'Wir erzählen Geschichten in Bewegung',
+  description: '<p>Momentum Film ist eine unabhängige Produktionsfirma mit Sitz in Berlin, die sich auf die Schaffung visuell beeindruckender und narrativ fesselnder filmischer Erlebnisse spezialisiert hat. Unser Team aus leidenschaftlichen Filmemachern, Autoren und Kreativen arbeitet Hand in Hand, um Geschichten zum Leben zu erwecken, die bewegen und inspirieren.</p>',
+  trailer_url: 'https://videos.pexels.com/video-files/2882191/2882191-hd_1920_1080_25fps.mp4',
+};

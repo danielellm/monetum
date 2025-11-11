@@ -323,7 +323,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         </AnimatePresence>
 
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-28">
             
             <div className="w-full">
                 <div className='self-start mb-4'>
@@ -356,7 +356,9 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                                      <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
                                   </>
                                 ) : (
-                                  <div className="h-[1em]">&nbsp;</div>
+                                  <div className="opacity-0">
+                                     <p><span className="text-muted-foreground">Genre</span> / <span>&nbsp;</span></p>
+                                  </div>
                                 )}
                             </motion.div>
                         </div>

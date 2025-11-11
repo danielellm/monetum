@@ -333,7 +333,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                         <span className="text-sm md:text-base text-gray-500">/{String(filmsOnly.length).padStart(2, '0')}</span>
                       </>
                     ) : (
-                      <span className="text-xl md:text-2xl text-primary font-headline">About Us</span>
+                      <span className="text-xl md:text-2xl text-primary font-headline">about us</span>
                     )}
                 </div>
 
@@ -395,7 +395,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         >
           {activeIsFilm && <FilmInfo film={activeItem} />}
           {!activeIsFilm && (
-             <div className="bg-background py-16 md:py-24">
+             <div className="bg-background py-8 md:py-12">
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
                     <motion.div
                         variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { ease: [0.6, 0.01, 0.05, 0.95], duration: 1.2 } } }}

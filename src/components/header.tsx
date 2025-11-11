@@ -64,7 +64,7 @@ export default function Header({ films }: HeaderProps) {
             </DropdownMenu>
 
             <Link href="/about-us" className="hover:text-primary transition-colors">
-              About Us
+              about us
             </Link>
             <a href="#contact" className="hover:text-primary transition-colors">
               Contact
@@ -124,7 +124,7 @@ export default function Header({ films }: HeaderProps) {
                     animate="visible"
                     onClick={() => setIsMenuOpen(false)}
                     className="text-3xl font-headline text-white hover:text-primary transition-colors">
-                    About Us
+                    about us
                 </motion.a>
                 <motion.a
                     href="#contact"

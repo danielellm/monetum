@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Film, Menu, X, ChevronDown } from 'lucide-react';
+import { Menu, X, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Film as FilmType } from '@/lib/types';
 import Link from 'next/link';
+import { Logo } from './logo';
 
 type HeaderProps = {
   films: FilmType[];
@@ -41,10 +42,9 @@ export default function Header({ films }: HeaderProps) {
     <>
       <header className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 text-white bg-transparent">
         <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
-          <a href="/" className="flex items-center gap-2 font-headline text-lg hover:text-primary transition-colors">
-            <Film className="h-5 w-5" />
-            <span>Momentum Film</span>
-          </a>
+          <Link href="/" className="hover:text-primary transition-colors">
+            <Logo className="h-8 w-auto" />
+          </Link>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-6 text-sm">

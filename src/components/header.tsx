@@ -63,7 +63,7 @@ export default function Header({ films }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link href="/about-us" className="hover:text-primary transition-colors lowercase">
+            <Link href="/about-us" className="hover:text-primary transition-colors lowercase relative bottom-px">
               about us
             </Link>
             <a href="#contact" className="hover:text-primary transition-colors lowercase">

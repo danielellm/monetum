@@ -4,7 +4,6 @@ import type { SliderItem, Film } from '@/lib/types';
 import { isFilm } from '@/lib/types';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import useEmblaCarousel from 'embla-carousel-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MoveHorizontal, Github, Twitter, Instagram } from 'lucide-react';
 
@@ -13,6 +12,7 @@ import FilmInfo from './film-info';
 import Footer from './footer';
 import Header from './header';
 import Gallery from './gallery';
+import useEmblaCarousel from 'embla-carousel-react';
 
 type FilmPageClientProps = {
   sliderItems: SliderItem[];

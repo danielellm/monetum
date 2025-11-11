@@ -13,7 +13,6 @@ import Footer from './footer';
 import Header from './header';
 import Gallery from './gallery';
 import useEmblaCarousel from 'embla-carousel-react';
-import AnimatedSection from './animated-section';
 
 type FilmPageClientProps = {
   sliderItems: SliderItem[];
@@ -352,7 +351,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         </div>
       </div>
 
-      <AnimatedSection>
+      <div>
         <AnimatePresence mode="wait">
           <motion.div
             key={activeItem.id}
@@ -376,9 +375,9 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
             )}
           </motion.div>
         </AnimatePresence>
-      </AnimatedSection>
+      </div>
       
-      <AnimatedSection>
+      <div>
         <AnimatePresence>
           {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
               <motion.div 
@@ -395,74 +394,70 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
               </motion.div>
           )}
         </AnimatePresence>
-      </AnimatedSection>
+      </div>
 
-      <AnimatedSection>
-        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
-          <div className="w-full flex justify-between items-center gap-8">
-              <button 
-                  onClick={scrollPrev} 
-                  className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
-              >
-                  <div className="group-hover:-translate-x-1 transition-transform">
-                      <ArrowLeft className="h-6 w-6" />
-                  </div>
-                  <div className="overflow-hidden">
-                      <div className="transition-transform">
-                          <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
-                          <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
-                      </div>
-                  </div>
-              </button>
-              <button 
-                  onClick={scrollNext} 
-                  className="flex flex-row-reverse items-center gap-3 text-white hover:text-primary transition-colors group"
-              >
-                  <div className="group-hover:translate-x-1 transition-transform">
-                      <ArrowRight className="h-6 w-6" />
-                  </div>
-                  <div className="overflow-hidden text-right">
-                      <div className="transition-transform">
-                          <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
-                          <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
-                      </div>
-                  </div>
-              </button>
-          </div>
+      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+        <div className="w-full flex justify-between items-center gap-8">
+            <button 
+                onClick={scrollPrev} 
+                className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
+            >
+                <div className="group-hover:-translate-x-1 transition-transform">
+                    <ArrowLeft className="h-6 w-6" />
+                </div>
+                <div className="overflow-hidden">
+                    <div className="transition-transform">
+                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
+                    </div>
+                </div>
+            </button>
+            <button 
+                onClick={scrollNext} 
+                className="flex flex-row-reverse items-center gap-3 text-white hover:text-primary transition-colors group"
+            >
+                <div className="group-hover:translate-x-1 transition-transform">
+                    <ArrowRight className="h-6 w-6" />
+                </div>
+                <div className="overflow-hidden text-right">
+                    <div className="transition-transform">
+                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
+                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
+                    </div>
+                </div>
+            </button>
         </div>
-      </AnimatedSection>
+      </div>
 
-      <AnimatedSection>
-        <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
-          <div className="w-full flex flex-col items-end gap-y-12">
-              <div className="text-right flex flex-col items-end gap-8">
-                  <div>
-                      <h3 className="text-sm text-primary">say hello</h3>
-                      <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
-                  </div>
-                  <div>
-                      <h3 className="text-sm text-primary">location</h3>
-                      <div className="text-white not-italic">
-                          <p>MOMENTUM FILM</p>
-                          <p>Lindenstr. 114</p>
-                          <p>10969 Berlin</p>
-                      </div>
-                  </div>
-              </div>
-              <div className="flex items-center gap-4">
-                <a href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
-                  <Instagram />
-                </a>
-                <a href="#" aria-label="Twitter" className="text-primary hover:text-primary/80 transition-colors">
-                  <Twitter />
-                </a>
-                <a href="#" aria-label="Github" className="text-primary hover:text-primary/80 transition-colors">
-                  <Github />
-                </a>
-              </div>
-          </div>
+      <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+        <div className="w-full flex flex-col items-end gap-y-12">
+            <div className="text-right flex flex-col items-end gap-8">
+                <div>
+                    <h3 className="text-sm text-primary">say hello</h3>
+                    <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
+                </div>
+                <div>
+                    <h3 className="text-sm text-primary">location</h3>
+                    <div className="text-white not-italic">
+                        <p>MOMENTUM FILM</p>
+                        <p>Lindenstr. 114</p>
+                        <p>10969 Berlin</p>
+                    </div>
+                </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <a href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
+                <Instagram />
+              </a>
+              <a href="#" aria-label="Twitter" className="text-primary hover:text-primary/80 transition-colors">
+                <Twitter />
+              </a>
+              <a href="#" aria-label="Github" className="text-primary hover:text-primary/80 transition-colors">
+                <Github />
+              </a>
+            </div>
         </div>
-      </AnimatedSection>
+      </div>
 
       <Footer />
     </main>

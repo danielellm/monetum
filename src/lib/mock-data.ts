@@ -69,7 +69,7 @@ export const mockFilms: Film[] = [
       'https://picsum.photos/seed/g32/1600/900',
     ],
     cast: [
-      { name: 'Chloé Dubois', role: 'Hauptrolle' },
+      { name: 'Chloé Duboises', role: 'Hauptrolle' },
       { name: 'Liam O\'Connell', role: 'Hauptrolle' },
     ],
     genre: 'Romanze',

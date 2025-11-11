@@ -333,7 +333,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                         <span className="text-sm md:text-base text-gray-500">/{String(filmsOnly.length).padStart(2, '0')}</span>
                       </>
                     ) : (
-                      <span className="text-xl md:text-2xl text-primary font-headline lowercase">about us</span>
+                      <span className="text-xl md:text-2xl text-primary font-normal lowercase">about us</span>
                     )}
                 </div>
 
@@ -347,7 +347,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                         className="w-full"
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className={`text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words ${!activeIsFilm ? 'lowercase' : ''}`}>{activeItem.title}</motion.h1>
+                            <motion.h1 variants={titleVariants} className={`text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words ${!activeIsFilm ? '' : ''}`}>{activeItem.title}</motion.h1>
                             <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                 {activeIsFilm ? (
                                   <>

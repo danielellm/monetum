@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { Film as FilmType } from '@/lib/types';
 import Link from 'next/link';
-import { Logo } from './logo';
+import Image from 'next/image';
 
 type HeaderProps = {
   films: FilmType[];
@@ -43,7 +43,7 @@ export default function Header({ films }: HeaderProps) {
       <header className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 text-white bg-transparent">
         <div className="max-w-screen-2xl mx-auto flex justify-between items-center">
           <Link href="/" className="hover:text-primary transition-colors">
-            <Logo className="h-8 w-auto" />
+            <Image src="/images/logo.png" alt="Momentum Film Logo" width={180} height={30} priority className="h-8 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}

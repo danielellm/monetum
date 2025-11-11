@@ -11,7 +11,7 @@ export type Film = {
   genre: string;
   duration: string;
   language: string;
-  additional_trailer_url: string;
+  additional_trailer_url?: string; // Made optional
   slider_position: number;
   is_startpage: boolean;
 };

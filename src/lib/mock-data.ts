@@ -61,7 +61,7 @@ export const mockFilms: Film[] = [
     title: 'Stadt der Lichter',
     slug: 'stadt-der-lichter',
     subtitle: 'Eine Nacht in Paris',
-    description: '<p>Zwei Fremde treffen sich in der Stadt der Liebe und verbringen eine unvergessliche Nacht miteinander. Eine romantische Erzählung über zufällige Begegnungen und die Magie des Moments.</p>',
+    description: '<p>Zwei Fremde treffen sich in der Stadt der Liebe und verbringen eine unvergessliche Nacht miteinander. Eine romantische Erzählung über zufällige Begegnungen und die Magie des Moments.</p><p>Dieser Film hat absichtlich keinen zusätzlichen Trailer, um das einspaltige Layout zu demonstrieren. Der Text sollte die volle Breite einnehmen.</p>',
     trailer_url: 'https://videos.pexels.com/video-files/853823/853823-hd_1920_1080_25fps.mp4',
     poster_url: 'https://picsum.photos/seed/p3/1000/1500',
     gallery: [
@@ -75,7 +75,7 @@ export const mockFilms: Film[] = [
     genre: 'Romanze',
     duration: '92 min',
     language: 'Französisch / Englisch',
-    additional_trailer_url: 'https://vimeo.com/902839948',
+    additional_trailer_url: '',
     slider_position: 3,
     is_startpage: false,
   },
@@ -87,5 +87,5 @@ export const mockAboutInfo: AboutInfo = {
   slug: 'about-us',
   subtitle: 'Wir erzählen Geschichten in Bewegung',
   description: '<p>Momentum Film ist eine unabhängige Produktionsfirma mit Sitz in Berlin, die sich auf die Schaffung visuell beeindruckender und narrativ fesselnder filmischer Erlebnisse spezialisiert hat. Unser Team aus leidenschaftlichen Filmemachern, Autoren und Kreativen arbeitet Hand in Hand, um Geschichten zum Leben zu erwecken, die bewegen und inspirieren.</p>',
-  trailer_url: 'https://videos.pexels.com/video-files/2882191/2882191-hd_1920_1080_25fps.mp4',
+  trailer_url: 'https://videos.pexels.com/video-files/854653/854653-hd_1920_1080_30fps.mp4',
 };

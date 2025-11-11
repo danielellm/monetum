@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Menu, X, ChevronDown } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,24 +18,6 @@ type HeaderProps = {
 
 export default function Header({ films }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-
-  const menuVariants = {
-    hidden: { opacity: 0, y: '-100%' },
-    visible: { opacity: 1, y: '0%', transition: { duration: 0.5, ease: 'easeInOut' } },
-    exit: { opacity: 0, y: '-100%', transition: { duration: 0.5, ease: 'easeInOut' } },
-  };
-
-  const linkVariants = {
-      hidden: { opacity: 0, y: 20 },
-      visible: (i: number) => ({
-          opacity: 1,
-          y: 0,
-          transition: {
-              delay: 0.3 + i * 0.1,
-              duration: 0.5,
-          },
-      }),
-  };
 
   return (
     <>
@@ -81,13 +62,8 @@ export default function Header({ films }: HeaderProps) {
       </header>
 
       {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            variants={menuVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
+      {isMenuOpen && (
+          <div
             className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm flex flex-col items-center justify-center overflow-y-auto py-16"
           >
             <button
@@ -99,11 +75,7 @@ export default function Header({ films }: HeaderProps) {
             </button>
 
             <nav className="flex flex-col items-center gap-8 text-center">
-                 <motion.div
-                    custom={0}
-                    variants={linkVariants}
-                    initial="hidden"
-                    animate="visible"
+                 <div
                     className="text-3xl font-headline text-white text-center"
                 >
                     <p className="mb-4">Movies</p>
@@ -114,35 +86,25 @@ export default function Header({ films }: HeaderProps) {
                            </Link>
                         ))}
                     </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                    custom={1}
-                    variants={linkVariants}
-                    initial="hidden"
-                    animate="visible"
-                >
+                <div>
                     <Link
                         href="/about-us"
                         onClick={() => setIsMenuOpen(false)}
                         className="text-3xl font-headline text-white hover:text-primary transition-colors lowercase">
                         about us
                     </Link>
-                </motion.div>
-                <motion.a
+                </div>
+                <a
                     href="#contact"
-                    custom={2}
-                    variants={linkVariants}
-                    initial="hidden"
-                    animate="visible"
                     onClick={() => setIsMenuOpen(false)}
                     className="text-3xl font-headline text-white hover:text-primary transition-colors lowercase">
                     contact
-                </motion.a>
+                </a>
             </nav>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </>
   );
 }

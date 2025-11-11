@@ -1,7 +1,6 @@
 'use client';
 
 import { SliderItem } from '@/lib/types';
-import { motion } from 'framer-motion';
 import { useEffect, useRef } from 'react';
 
 type HeroSlideProps = {
@@ -13,6 +12,7 @@ type HeroSlideProps = {
 
 export default function HeroSlide({ item, isActive, isMuted, hasInteracted }: HeroSlideProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const playVideo = async () => {
     const video = videoRef.current;
@@ -48,15 +48,19 @@ export default function HeroSlide({ item, isActive, isMuted, hasInteracted }: He
         videoRef.current.muted = isMuted;
      }
   }, [isMuted]);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      containerRef.current.style.opacity = isActive ? '1' : '0';
+    }
+  }, [isActive]);
   
   const posterUrl = 'poster_url' in item ? item.poster_url : undefined;
 
   return (
-    <motion.div
-      className="absolute inset-0 w-full h-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: isActive ? 1 : 0 }}
-      transition={{ duration: 1.5, ease: 'easeInOut' }}
+    <div
+      ref={containerRef}
+      className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
     >
       <video
         ref={videoRef}
@@ -69,6 +73,6 @@ export default function HeroSlide({ item, isActive, isMuted, hasInteracted }: He
         src={item.trailer_url}
         poster={posterUrl}
       />
-    </motion.div>
+    </div>
   );
 }

@@ -1,23 +1,9 @@
 'use client';
 
 import { Film } from '@/lib/types';
-import { motion } from 'framer-motion';
 import React from 'react';
 import TrailerEmbed from './trailer-embed';
 import { cn } from '@/lib/utils';
-
-const createVariants = (delay: number) => ({
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      ease: [0.6, 0.01, 0.05, 0.95],
-      duration: 1.2,
-      delay: delay,
-    },
-  },
-});
 
 export default function FilmInfo({ film }: { film: Film }) {
   const hasAdditionalTrailer = !!film.additional_trailer_url;
@@ -38,12 +24,7 @@ export default function FilmInfo({ film }: { film: Film }) {
               !hasAdditionalTrailer && 'col-span-1'
             )}
           >
-            <motion.div
-              variants={createVariants(0)}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-            >
+            <div>
               <div
                 className={cn(
                   'prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg',
@@ -51,15 +32,9 @@ export default function FilmInfo({ film }: { film: Film }) {
                 )}
                 dangerouslySetInnerHTML={{ __html: film.description }}
               />
-            </motion.div>
+            </div>
 
-            <motion.div
-              variants={createVariants(0.2)}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              className="mt-12 md:mt-0"
-            >
+            <div className="mt-12 md:mt-0">
               <div className="text-sm font-mono text-right flex flex-wrap justify-end">
                 {film.cast.map((person, index) => (
                   <React.Fragment key={person.name}>
@@ -74,20 +49,14 @@ export default function FilmInfo({ film }: { film: Film }) {
                   </React.Fragment>
                 ))}
               </div>
-            </motion.div>
+            </div>
           </div>
 
           {/* Right Column: Trailer (Conditional) */}
           {hasAdditionalTrailer && (
-            <motion.div
-              variants={createVariants(0.4)}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, amount: 0.2 }}
-              className="mt-12 md:mt-0"
-            >
+            <div className="mt-12 md:mt-0">
               <TrailerEmbed url={film.additional_trailer_url} />
-            </motion.div>
+            </div>
           )}
         </div>
       </div>

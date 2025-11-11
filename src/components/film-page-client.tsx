@@ -4,7 +4,6 @@ import type { SliderItem, Film } from '@/lib/types';
 import { isFilm } from '@/lib/types';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, MoveHorizontal, Github, Twitter, Instagram } from 'lucide-react';
 
 import HeroSlide from './hero-slide';
@@ -20,38 +19,6 @@ type FilmPageClientProps = {
 };
 
 const AUTOPLAY_DURATION = 12000; // 12 seconds
-
-const containerVariants = {
-  hidden: { opacity: 1 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.2,
-    },
-  },
-  exit: {
-    opacity: 1,
-  },
-};
-
-const titleVariants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { delay: 0.4, duration: 0.6, ease: [0.22, 1, 0.36, 1] } 
-  },
-};
-
-const detailsVariants = {
-  hidden: { opacity: 0, x: -30 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { delay: 0.6, duration: 0.5, ease: [0.22, 1, 0.36, 1] } 
-  },
-};
-
 
 export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageClientProps) {
   const router = useRouter();
@@ -282,11 +249,9 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
       <Header films={filmsOnly} />
       <div className="relative h-screen w-full overflow-hidden" ref={heroRef}>
         <div className="absolute top-0 left-0 w-full h-0.5 bg-transparent z-20">
-            {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <motion.div
+            {(progress > 0 && (!isTouchDevice.current || hasInteracted)) && <div
                 className="h-full bg-primary"
-                initial={{ width: '0%' }}
-                animate={{ width: `${progress}%` }}
-                transition={{ duration: 0.1, ease: "linear" }}
+                style={{ width: `${progress}%` }}
             />}
         </div>
 
@@ -305,25 +270,19 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
           </div>
         </div>
         
-        <AnimatePresence>
-            {showSwipeHint && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: [0, 0.5, 0.5, 0] }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 2.0, times: [0, 0.1, 0.9, 1] }}
-                    className="absolute z-30 top-24 left-0 right-0 w-full flex items-center justify-center pointer-events-none"
-                >
-                    <div className="flex items-center gap-2 bg-black/30 text-white p-2 px-4 rounded-lg backdrop-blur-sm">
-                        <MoveHorizontal className="w-5 h-5"/>
-                        <span className="text-sm font-light">Swipe to navigate</span>
-                    </div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+        {showSwipeHint && (
+            <div
+                className="absolute z-30 top-24 left-0 right-0 w-full flex items-center justify-center pointer-events-none opacity-50"
+            >
+                <div className="flex items-center gap-2 bg-black/30 text-white p-2 px-4 rounded-lg backdrop-blur-sm">
+                    <MoveHorizontal className="w-5 h-5"/>
+                    <span className="text-sm font-light">Swipe to navigate</span>
+                </div>
+            </div>
+        )}
 
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-28">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
             <div className="w-full">
                 <div className='self-start mb-4'>
@@ -337,144 +296,110 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                     )}
                 </div>
 
-                <AnimatePresence mode="wait">
-                     <motion.div
-                        key={activeItem.id}
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                        className="w-full"
-                      >
-                        <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</motion.h1>
-                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                                {activeIsFilm ? (
-                                  <>
-                                     <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
-                                     <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
-                                     <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
-                                  </>
-                                ) : (
-                                  <div className="opacity-0">
-                                     <p><span className="text-muted-foreground">Genre</span> / <span>&nbsp;</span></p>
-                                  </div>
-                                )}
-                            </motion.div>
+                 <div
+                    key={activeItem.id}
+                    className="w-full"
+                  >
+                    <div className="flex flex-col items-start text-left max-w-none">
+                        <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</h1>
+                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                            {activeIsFilm ? (
+                              <>
+                                 <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
+                                 <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
+                                 <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
+                              </>
+                            ) : (
+                              <div className="opacity-0">
+                                 <p><span className="text-muted-foreground">Genre</span> / <span>&nbsp;</span></p>
+                              </div>
+                            )}
                         </div>
-                     </motion.div>
-                </AnimatePresence>
+                    </div>
+                 </div>
             </div>
             
             <div className="flex items-center gap-4 mt-16 pointer-events-auto">
-                <motion.button 
+                <button 
                     onClick={scrollPrev} 
                     className="p-2 text-white hover:text-primary transition-colors group"
-                    whileHover="hover"
                 >
-                    <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                    <div className="group-hover:-translate-x-1 transition-transform">
                         <ArrowLeft className="h-6 w-6 md:h-7 md:w-7" />
-                    </motion.div>
-                </motion.button>
-                    <motion.button 
+                    </div>
+                </button>
+                <button 
                     onClick={scrollNext} 
                     className="p-2 text-white hover:text-primary transition-colors group"
-                    whileHover="hover"
                 >
-                    <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                    <div className="group-hover:translate-x-1 transition-transform">
                         <ArrowRight className="h-6 w-6 md:h-7 md:w-7" />
-                    </motion.div>
-                </motion.button>
+                    </div>
+                </button>
             </div>
 
           </div>
         </div>
       </div>
 
-      <AnimatePresence mode="wait">
-        <motion.div
-            key={activeItem.id}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-        >
+      <div>
+        <div key={activeItem.id}>
           {activeIsFilm && <FilmInfo film={activeItem} />}
           {!activeIsFilm && (
              <div className="bg-background py-16 md:py-24">
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
-                    <motion.div
-                        variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { ease: [0.6, 0.01, 0.05, 0.95], duration: 1.2 } } }}
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.2 }}
-                    >
+                    <div>
                         <div
                             className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg max-w-4xl"
                             dangerouslySetInnerHTML={{ __html: activeItem.description }}
                         />
-                    </motion.div>
+                    </div>
                 </div>
              </div>
           )}
-        </motion.div>
-      </AnimatePresence>
+        </div>
+      </div>
       
-      <AnimatePresence mode="wait">
-        <motion.div
-            key={`${activeItem.id}-gallery`}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.7 }}
-        >
-            {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
-                <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
-                     <motion.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: true, amount: 0.1 }}
-                        variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6 } } }}
-                    >
-                        <Gallery images={activeItem.gallery} />
-                    </motion.div>
+      <div key={`${activeItem.id}-gallery`}>
+        {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
+            <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
+                 <div>
+                    <Gallery images={activeItem.gallery} />
                 </div>
-            )}
-        </motion.div>
-      </AnimatePresence>
+            </div>
+        )}
+      </div>
 
       <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
         <div className="w-full flex justify-between items-center gap-8">
-            <motion.button 
+            <button 
                 onClick={scrollPrev} 
                 className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
-                whileHover="hover"
             >
-                <motion.div variants={{ hover: { x: -5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                <div className="group-hover:-translate-x-1 transition-transform">
                     <ArrowLeft className="h-6 w-6" />
-                </motion.div>
+                </div>
                 <div className="overflow-hidden">
-                    <motion.div variants={{ hover: { x: 10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }} className="group-hover:-translate-x-full">
+                    <div className="transition-transform">
                         <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
                         <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
-                    </motion.div>
+                    </div>
                 </div>
-            </motion.button>
-            <motion.button 
+            </button>
+            <button 
                 onClick={scrollNext} 
                 className="flex flex-row-reverse items-center gap-3 text-white hover:text-primary transition-colors group"
-                whileHover="hover"
             >
-                <motion.div variants={{ hover: { x: 5 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                <div className="group-hover:translate-x-1 transition-transform">
                     <ArrowRight className="h-6 w-6" />
-                </motion.div>
+                </div>
                  <div className="overflow-hidden text-right">
-                    <motion.div variants={{ hover: { x: -10 } }} transition={{ type: 'spring', stiffness: 400, damping: 15 }}>
+                    <div className="transition-transform">
                         <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
                         <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
-                    </motion.div>
+                    </div>
                 </div>
-            </motion.button>
+            </button>
         </div>
       </div>
 

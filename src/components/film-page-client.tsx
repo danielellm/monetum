@@ -333,7 +333,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                         <span className="text-sm md:text-base text-gray-500">/{String(filmsOnly.length).padStart(2, '0')}</span>
                       </>
                     ) : (
-                      <span className="text-xl md:text-2xl text-primary font-headline">about us</span>
+                      <span className="text-xl md:text-2xl text-primary font-headline lowercase">about us</span>
                     )}
                 </div>
 
@@ -356,7 +356,6 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                                      <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
                                   </>
                                 ) : (
-                                  // This is a placeholder to maintain vertical alignment
                                   <p className="h-[1em]">&nbsp;</p>
                                 )}
                             </motion.div>

@@ -116,16 +116,19 @@ export default function Header({ films }: HeaderProps) {
                     </div>
                 </motion.div>
 
-                <motion.a
-                    href="/about-us"
+                <motion.div
                     custom={1}
                     variants={linkVariants}
                     initial="hidden"
                     animate="visible"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="text-3xl font-headline text-white hover:text-primary transition-colors">
-                    about us
-                </motion.a>
+                >
+                    <Link
+                        href="/about-us"
+                        onClick={() => setIsMenuOpen(false)}
+                        className="text-3xl font-headline text-white hover:text-primary transition-colors">
+                        about us
+                    </Link>
+                </motion.div>
                 <motion.a
                     href="#contact"
                     custom={2}

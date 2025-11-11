@@ -5,6 +5,7 @@ import { isFilm } from '@/lib/types';
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, ArrowRight, MoveHorizontal, Github, Twitter, Instagram } from 'lucide-react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import HeroSlide from './hero-slide';
 import FilmInfo from './film-info';
@@ -12,6 +13,7 @@ import Footer from './footer';
 import Header from './header';
 import Gallery from './gallery';
 import useEmblaCarousel from 'embla-carousel-react';
+import AnimatedSection from './animated-section';
 
 type FilmPageClientProps = {
   sliderItems: SliderItem[];
@@ -296,27 +298,35 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                     )}
                 </div>
 
-                 <div
-                    key={activeItem.id}
-                    className="w-full"
-                  >
-                    <div className="flex flex-col items-start text-left max-w-none">
-                        <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</h1>
-                        <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                            {activeIsFilm ? (
-                              <>
-                                 <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
-                                 <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
-                                 <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
-                              </>
-                            ) : (
-                              <div className="opacity-0">
-                                 <p><span className="text-muted-foreground">Genre</span> / <span>&nbsp;</span></p>
-                              </div>
-                            )}
-                        </div>
-                    </div>
-                 </div>
+                 <AnimatePresence mode="wait">
+                   <motion.div
+                      key={activeItem.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      transition={{ duration: 0.5 }}
+                      className="w-full"
+                    >
+                      <div className="flex flex-col items-start text-left max-w-none">
+                          <h1 className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</h1>
+                          <div className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                              {activeIsFilm ? (
+                                <>
+                                   <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
+                                   <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
+                                   <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
+                                </>
+                              ) : (
+                                <div className="opacity-0">
+                                   <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">&nbsp;</span></p>
+                                   <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">&nbsp;</span></p>
+                                   <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">&nbsp;</span></p>
+                                </div>
+                              )}
+                          </div>
+                      </div>
+                   </motion.div>
+                 </AnimatePresence>
             </div>
             
             <div className="flex items-center gap-4 mt-16 pointer-events-auto">
@@ -342,96 +352,117 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         </div>
       </div>
 
-      <div>
-        <div key={activeItem.id}>
-          {activeIsFilm && <FilmInfo film={activeItem} />}
-          {!activeIsFilm && (
-             <div className="bg-background py-16 md:py-24">
-                <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
-                    <div>
-                        <div
-                            className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg max-w-4xl"
-                            dangerouslySetInnerHTML={{ __html: activeItem.description }}
-                        />
-                    </div>
-                </div>
-             </div>
-          )}
-        </div>
-      </div>
+      <AnimatedSection>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeItem.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+          >
+            {activeIsFilm && <FilmInfo film={activeItem} />}
+            {!activeIsFilm && (
+              <div className="bg-background py-16 md:py-24">
+                  <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
+                      <div>
+                          <div
+                              className="prose prose-invert prose-p:text-gray-300 prose-headings:font-headline text-lg max-w-4xl"
+                              dangerouslySetInnerHTML={{ __html: activeItem.description }}
+                          />
+                      </div>
+                  </div>
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </AnimatedSection>
       
-      <div key={`${activeItem.id}-gallery`}>
-        {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
-            <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
-                 <div>
-                    <Gallery images={activeItem.gallery} />
+      <AnimatedSection>
+        <AnimatePresence>
+          {activeIsFilm && activeItem.gallery && activeItem.gallery.length > 0 && (
+              <motion.div 
+                key={`${activeItem.id}-gallery`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+              >
+                <div className="max-w-screen-2xl mx-auto px-4 md:px-6 py-16 md:py-24">
+                    <div>
+                        <Gallery images={activeItem.gallery} />
+                    </div>
                 </div>
-            </div>
-        )}
-      </div>
+              </motion.div>
+          )}
+        </AnimatePresence>
+      </AnimatedSection>
 
-      <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
-        <div className="w-full flex justify-between items-center gap-8">
-            <button 
-                onClick={scrollPrev} 
-                className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
-            >
-                <div className="group-hover:-translate-x-1 transition-transform">
-                    <ArrowLeft className="h-6 w-6" />
-                </div>
-                <div className="overflow-hidden">
-                    <div className="transition-transform">
-                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
-                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
-                    </div>
-                </div>
-            </button>
-            <button 
-                onClick={scrollNext} 
-                className="flex flex-row-reverse items-center gap-3 text-white hover:text-primary transition-colors group"
-            >
-                <div className="group-hover:translate-x-1 transition-transform">
-                    <ArrowRight className="h-6 w-6" />
-                </div>
-                 <div className="overflow-hidden text-right">
-                    <div className="transition-transform">
-                        <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
-                        <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
-                    </div>
-                </div>
-            </button>
+      <AnimatedSection>
+        <div className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+          <div className="w-full flex justify-between items-center gap-8">
+              <button 
+                  onClick={scrollPrev} 
+                  className="flex items-center gap-3 text-white hover:text-primary transition-colors group"
+              >
+                  <div className="group-hover:-translate-x-1 transition-transform">
+                      <ArrowLeft className="h-6 w-6" />
+                  </div>
+                  <div className="overflow-hidden">
+                      <div className="transition-transform">
+                          <span className="text-xs text-muted-foreground uppercase tracking-widest">Prev</span>
+                          <p className="font-headline text-lg hidden md:block whitespace-nowrap">{prevItem.title}</p>
+                      </div>
+                  </div>
+              </button>
+              <button 
+                  onClick={scrollNext} 
+                  className="flex flex-row-reverse items-center gap-3 text-white hover:text-primary transition-colors group"
+              >
+                  <div className="group-hover:translate-x-1 transition-transform">
+                      <ArrowRight className="h-6 w-6" />
+                  </div>
+                  <div className="overflow-hidden text-right">
+                      <div className="transition-transform">
+                          <span className="text-xs text-muted-foreground uppercase tracking-widest">Next</span>
+                          <p className="font-headline text-lg hidden md:block whitespace-nowrap">{nextItem.title}</p>
+                      </div>
+                  </div>
+              </button>
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
 
-      <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
-        <div className="w-full flex flex-col items-end gap-y-12">
-            <div className="text-right flex flex-col items-end gap-8">
-                <div>
-                    <h3 className="text-sm text-primary">say hello</h3>
-                    <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
-                </div>
-                <div>
-                    <h3 className="text-sm text-primary">location</h3>
-                    <div className="text-white not-italic">
-                        <p>MOMENTUM FILM</p>
-                        <p>Lindenstr. 114</p>
-                        <p>10969 Berlin</p>
-                    </div>
-                </div>
-            </div>
-             <div className="flex items-center gap-4">
-              <a href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
-                <Instagram />
-              </a>
-              <a href="#" aria-label="Twitter" className="text-primary hover:text-primary/80 transition-colors">
-                <Twitter />
-              </a>
-              <a href="#" aria-label="Github" className="text-primary hover:text-primary/80 transition-colors">
-                <Github />
-              </a>
-            </div>
+      <AnimatedSection>
+        <div id="contact" className="max-w-screen-2xl mx-auto px-4 md:px-6 pb-16 md:pb-24">
+          <div className="w-full flex flex-col items-end gap-y-12">
+              <div className="text-right flex flex-col items-end gap-8">
+                  <div>
+                      <h3 className="text-sm text-primary">say hello</h3>
+                      <a href="mailto:email@email.de" className="text-white hover:text-primary transition-colors">email_at_email.de</a>
+                  </div>
+                  <div>
+                      <h3 className="text-sm text-primary">location</h3>
+                      <div className="text-white not-italic">
+                          <p>MOMENTUM FILM</p>
+                          <p>Lindenstr. 114</p>
+                          <p>10969 Berlin</p>
+                      </div>
+                  </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <a href="#" aria-label="Instagram" className="text-primary hover:text-primary/80 transition-colors">
+                  <Instagram />
+                </a>
+                <a href="#" aria-label="Twitter" className="text-primary hover:text-primary/80 transition-colors">
+                  <Twitter />
+                </a>
+                <a href="#" aria-label="Github" className="text-primary hover:text-primary/80 transition-colors">
+                  <Github />
+                </a>
+              </div>
+          </div>
         </div>
-      </div>
+      </AnimatedSection>
 
       <Footer />
     </main>

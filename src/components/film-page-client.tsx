@@ -348,13 +348,18 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
                             <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</motion.h1>
-                            {activeIsFilm && (
-                              <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
-                                 <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
-                                 <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
-                                 <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
-                              </motion.div>
-                            )}
+                            <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
+                                {activeIsFilm ? (
+                                  <>
+                                     <p><span className="text-muted-foreground">Genre</span> / <span className="text-foreground">{activeItem.genre}</span></p>
+                                     <p><span className="text-muted-foreground">Dauer</span> / <span className="text-foreground">{activeItem.duration}</span></p>
+                                     <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
+                                  </>
+                                ) : (
+                                  // This is a placeholder to maintain vertical alignment
+                                  <p className="h-[1em]">&nbsp;</p>
+                                )}
+                            </motion.div>
                         </div>
                      </motion.div>
                 </AnimatePresence>
@@ -395,7 +400,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         >
           {activeIsFilm && <FilmInfo film={activeItem} />}
           {!activeIsFilm && (
-             <div className="bg-background py-8 md:py-12">
+             <div className="bg-background py-16 md:py-24">
                 <div className="max-w-screen-2xl mx-auto px-4 md:px-6">
                     <motion.div
                         variants={{ hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { ease: [0.6, 0.01, 0.05, 0.95], duration: 1.2 } } }}

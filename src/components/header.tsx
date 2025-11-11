@@ -67,7 +67,7 @@ export default function Header({ films }: HeaderProps) {
               about us
             </Link>
             <a href="#contact" className="hover:text-primary transition-colors">
-              Contact
+              contact
             </a>
           </nav>
 
@@ -137,7 +137,7 @@ export default function Header({ films }: HeaderProps) {
                     animate="visible"
                     onClick={() => setIsMenuOpen(false)}
                     className="text-3xl font-headline text-white hover:text-primary transition-colors">
-                    Contact
+                    contact
                 </motion.a>
             </nav>
           </motion.div>

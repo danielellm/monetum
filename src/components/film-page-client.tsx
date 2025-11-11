@@ -323,7 +323,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
         </AnimatePresence>
 
         <div className="absolute inset-0 z-10 flex flex-col justify-end bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none">
-          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-28 md:pb-40">
+          <div className="w-full max-w-screen-2xl mx-auto px-4 md:px-6 relative h-full flex flex-col justify-end pb-24 md:pb-32">
             
             <div className="w-full">
                 <div className='self-start mb-4'>
@@ -347,7 +347,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                         className="w-full"
                       >
                         <div className="flex flex-col items-start text-left max-w-none">
-                            <motion.h1 variants={titleVariants} className={`text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words ${!activeIsFilm ? '' : ''}`}>{activeItem.title}</motion.h1>
+                            <motion.h1 variants={titleVariants} className="text-7xl md:text-[160px] lg:text-[220px] font-bold font-headline leading-none break-words">{activeItem.title}</motion.h1>
                             <motion.div variants={detailsVariants} className="flex flex-wrap gap-x-4 md:gap-x-6 mt-6 text-xs font-mono uppercase tracking-wider">
                                 {activeIsFilm ? (
                                   <>
@@ -356,7 +356,7 @@ export default function FilmPageClient({ sliderItems, initialSlug }: FilmPageCli
                                      <p><span className="text-muted-foreground">Sprache</span> / <span className="text-foreground">{activeItem.language}</span></p>
                                   </>
                                 ) : (
-                                  <p className="h-[1em]">&nbsp;</p>
+                                  <div className="h-[1em]">&nbsp;</div>
                                 )}
                             </motion.div>
                         </div>

@@ -63,10 +63,10 @@ export default function Header({ films }: HeaderProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link href="/about-us" className="hover:text-primary transition-colors">
+            <Link href="/about-us" className="hover:text-primary transition-colors lowercase">
               about us
             </Link>
-            <a href="#contact" className="hover:text-primary transition-colors">
+            <a href="#contact" className="hover:text-primary transition-colors lowercase">
               contact
             </a>
           </nav>
@@ -125,7 +125,7 @@ export default function Header({ films }: HeaderProps) {
                     <Link
                         href="/about-us"
                         onClick={() => setIsMenuOpen(false)}
-                        className="text-3xl font-headline text-white hover:text-primary transition-colors">
+                        className="text-3xl font-headline text-white hover:text-primary transition-colors lowercase">
                         about us
                     </Link>
                 </motion.div>
@@ -136,7 +136,7 @@ export default function Header({ films }: HeaderProps) {
                     initial="hidden"
                     animate="visible"
                     onClick={() => setIsMenuOpen(false)}
-                    className="text-3xl font-headline text-white hover:text-primary transition-colors">
+                    className="text-3xl font-headline text-white hover:text-primary transition-colors lowercase">
                     contact
                 </motion.a>
             </nav>
